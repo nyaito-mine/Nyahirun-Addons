@@ -1,0 +1,36 @@
+{
+	"schemaVersion": 1,
+	"id": "nyahirunaddons",
+	"version": "${version}",
+	"name": "NyahirunAddons",
+	"description": "This is an example description! Tell everyone what your mod is about!",
+	"authors": [
+		"Me!"
+	],
+	"contact": {
+		"homepage": "https://fabricmc.net/",
+		"sources": "https://github.com/FabricMC/fabric-example-mod"
+	},
+	"license": "CC0-1.0",
+	"icon": "assets/nyahirunaddons/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"client": [
+			{
+				"value": "co.skyblock.NyahirunAddons",
+				"adapter": "kotlin"
+			}
+		]
+	},
+	"mixins": [
+		"nyahirunaddons.mixins.json"
+	],
+	"depends": {
+		"fabricloader": ">=0.15.11",
+		"minecraft": "~1.21.10",
+		"java": ">=21",
+		"fabric-api": "*",
+		"fabric-language-kotlin": "*",
+        "stella": "*"
+	}
+}
