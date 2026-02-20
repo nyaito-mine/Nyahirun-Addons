@@ -338,7 +338,7 @@ object ConfigAddons { // オブジェクトにまとめる
                 }
             }
 
-            subcategory("Test") {
+            /*subcategory("Test") {
                 toggle {
                     configName = "testConfig"
                     name = "Test"
@@ -361,7 +361,7 @@ object ConfigAddons { // オブジェクトにまとめる
                     description = "ColorPicker Description"
                     default = Color(0, 255, 255, 255)
                 }
-            }
+            }*/
         }
     }
 }
