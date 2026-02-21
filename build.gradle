@@ -42,13 +42,17 @@ dependencies {
     modImplementation include("net.hypixel:mod-api:${project.hypixel_api_version}")
     modImplementation include("maven.modrinth:hypixel-mod-api:${project.hypixel_api_fabric_version}")
 
-    modImplementation include("com.github.stivais:Commodore:1.0.1")
-    modImplementation include("dev.deftu:omnicore-1.21.10-fabric:1.0.0-beta.40")
-    modImplementation include("dev.deftu:textile-1.21.10-fabric:1.0.0-beta.10")
-    modImplementation include("co.stellarskys:vexel-1.21.10-fabric:135")
+    modImplementation include("com.github.stivais:Commodore:${project.commodore_version}")
+    modImplementation include("dev.deftu:omnicore-1.21.10-fabric:${project.omnicore_version}")
+    modImplementation include("dev.deftu:textile-1.21.10-fabric:${project.textile_version}")
 
-    modCompileOnly("maven.modrinth:stella:1.0.4")
-    modRuntimeOnly("maven.modrinth:stella:1.0.4")
+    modImplementation include("org.lwjgl:lwjgl-nanovg:${lwjgl_version}")
+    ["windows", "linux", "linux-arm64", "macos", "macos-arm64"].each { os ->
+        modImplementation include("org.lwjgl:lwjgl-nanovg:${lwjgl_version}:natives-${os}")
+    }
+
+    modCompileOnly("maven.modrinth:stella:${project.stella_version}")
+    modRuntimeOnly("maven.modrinth:stella:${project.stella_version}")
 }
 
 processResources {

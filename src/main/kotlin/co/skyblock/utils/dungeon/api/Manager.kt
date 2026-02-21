@@ -93,7 +93,7 @@ object Manager {
 
                     for ((key, value) in floorJson.entrySet()) {
                         val obj = value.asJsonObject
-                        floorPB["floor_$key"] = obj.get("normal").asString
+                        floorPB["floor_$key"] = obj.get("plus").asString
                     }
 
                     val masterJson = root
@@ -102,7 +102,7 @@ object Manager {
 
                     for ((key, value) in masterJson.entrySet()) {
                         val obj = value.asJsonObject
-                        masterPB["floor_$key"] = obj.get("masternormal").asString
+                        masterPB["floor_$key"] = obj.get("masterplus").asString
                     }
 
                     val playerData = PlayerData(
