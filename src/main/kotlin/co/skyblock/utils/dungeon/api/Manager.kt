@@ -15,10 +15,13 @@ object Manager {
 
     data class PlayerData(
         val cataLevel: Double,
+        val classLevel: Map<String, Double>,
         val totalSecrets: Int,
         val secretAverage: Double,
         val floorPB: Map<String, String>,
-        val masterFloorPB: Map<String, String>
+        val masterFloorPB: Map<String, String>,
+        val magicalPower: Int,
+        val sbLevel: String
     )
 
     private data class CachedPlayer(
@@ -34,8 +37,13 @@ object Manager {
 
     // ===== 外部取得用 =====
 
-    fun getCachedLevel(playerName: String): Double? =
+    fun getCachedCataLevel(playerName: String): Double? =
         getValidCache(playerName)?.cataLevel
+
+    fun getCachedClassLevel(playerName: String, className: String): Double? {
+        val data = getValidCache(playerName) ?: return null
+        return data.classLevel[className]
+    }
 
     fun getCachedSecret(playerName: String): Int? =
         getValidCache(playerName)?.totalSecrets
@@ -52,10 +60,16 @@ object Manager {
         }
     }
 
+    fun getCachedMagicalPower(playerName: String): Int? =
+        getValidCache(playerName)?.magicalPower
+
+    fun getCachedSBLevel(playerName: String): String? =
+        getValidCache(playerName)?.sbLevel
+
     fun isFetching(playerName: String): Boolean =
         fetching.contains(playerName)
 
-    fun fetchAsync(playerName: String) {
+    fun fetchAsync(playerName: String, onComplete: (() -> Unit)? = null) {
         if (fetching.contains(playerName)) return
         fetching.add(playerName)
 
@@ -78,6 +92,15 @@ object Manager {
                     val cataLevel = root
                         .getAsJsonObject("Cata")
                         .get("CataLevel").asString.toDouble()
+
+                    val classLV = mutableMapOf<String, Double>()
+
+                    val classJson = root.getAsJsonObject("Class")
+
+                    for ((key, value) in classJson.entrySet()) {
+                        val obj = value.asJsonObject
+                        classLV["class_$key"] = obj.get("Level").asString.toDouble()
+                    }
 
                     val secretObj = root.getAsJsonObject("Secret")
                     val totalSecrets = secretObj.get("TotalSecrets").asInt
@@ -105,12 +128,19 @@ object Manager {
                         masterPB["floor_$key"] = obj.get("masterplus").asString
                     }
 
+                    val magicalPower = root.get("MagicalPower").asInt
+
+                    val sbLevel = root.get("SBLevel").asString
+
                     val playerData = PlayerData(
                         cataLevel,
+                        classLV,
                         totalSecrets,
                         secretAverage,
                         floorPB,
-                        masterPB
+                        masterPB,
+                        magicalPower,
+                        sbLevel
                     )
 
                     cache[playerName] = CachedPlayer(
@@ -118,6 +148,8 @@ object Manager {
                         System.currentTimeMillis()
                     )
                 }
+
+                onComplete?.invoke()
 
             } catch (e: Exception) {
                 e.printStackTrace()
