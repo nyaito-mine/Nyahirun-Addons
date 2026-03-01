@@ -8,6 +8,29 @@ object ConfigAddons { // オブジェクトにまとめる
         config.category("NA1") {
 
             subcategory("General") {
+                toggle {
+                    configName = "usePetHighlight"
+                    name = "Use Pet Highlight"
+                    description = "Use Pet Highlight"
+                    default = false
+                }
+
+                colorpicker {
+                    configName = "usePetHighlightColor"
+                    name = "Pet Color"
+                    description = "ColorPicker Highlight Use Pet"
+                    default = Color(0, 255, 0, 180)
+                }
+
+                toggle {
+                    configName = "efficientDB"
+                    name = "⚠ Efficient DB"
+                    description = "This Setting Dangerous"
+                    default = false
+                }
+            }
+
+            subcategory("Party Finder") {
                 dropdown {
                     configName = "partyFinder"
                     name = "Party Finder"
@@ -30,24 +53,39 @@ object ConfigAddons { // オブジェクトにまとめる
                     default = Color(255, 0, 0, 180)
                 }
 
+
                 toggle {
-                    configName = "usePetHighlight"
-                    name = "Use Pet Highlight"
-                    description = "Use Pet Highlight"
+                    configName = "autoKick"
+                    name = "AutoKick"
+                    description = "Enable AutoKick"
                     default = false
                 }
 
-                colorpicker {
-                    configName = "usePetHighlightColor"
-                    name = "Pet Color"
-                    description = "ColorPicker Highlight Use Pet"
-                    default = Color(0, 255, 0, 180)
+                textinput {
+                    configName = "f7Time"
+                    name = "F7 Time"
+                    description = "Input Require PB"
+                    placeholder = "10:00"
+                }
+
+                textinput {
+                    configName = "m7Time"
+                    name = "M7 Time"
+                    description = "Input Require PB"
+                    placeholder = "10:00"
+                }
+
+                textinput {
+                    configName = "otherFloorTime"
+                    name = "F1~F6 M1~M6 Time"
+                    description = "Input Require PB"
+                    placeholder = "10:00"
                 }
 
                 toggle {
-                    configName = "efficientDB"
-                    name = "⚠ Efficient DB"
-                    description = "This Setting Dangerous"
+                    configName = "playerStats"
+                    name = "Player Stats"
+                    description = "Enable Player Stats"
                     default = false
                 }
             }

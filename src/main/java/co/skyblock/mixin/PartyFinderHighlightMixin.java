@@ -1,6 +1,6 @@
 package co.skyblock.mixin;
 
-import co.skyblock.features.nyahirunaddons.na1.general.partyFinder;
+import co.skyblock.features.nyahirunaddons.na1.partyfinder.partyFinder;
 import co.skyblock.utils.dungeon.ClassState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;

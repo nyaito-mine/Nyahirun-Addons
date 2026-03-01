@@ -1,4 +1,4 @@
-package co.skyblock.features.nyahirunaddons.na1.general
+package co.skyblock.features.nyahirunaddons.na1.partyfinder
 
 import co.skyblock.events.core.ItemTooltipEvent
 import co.stellarskys.stella.annotations.Module
@@ -28,7 +28,7 @@ object partyFinder : Feature("partyFinder") {
             var currentDungeon = ""
             var currentFloor = ""
             var hasDungeon = false
-            var hasNote = false
+            var hasMember = false
 
             val foundJobs = mutableSetOf<String>()
 
@@ -43,24 +43,24 @@ object partyFinder : Feature("partyFinder") {
                         hasDungeon = true
                     }
 
-                    str.startsWith("Note:") -> {
-                        hasNote = true
-                    }
-
                     str.startsWith("Floor:") -> {
                         currentFloor = str.removePrefix("Floor:").trim()
+                    }
+
+                    str.startsWith("Members:") -> {
+                        hasMember = true
                     }
 
                     str.contains(":") -> {
 
                         for (job in jobs) {
-                            if (str.contains(": $job") && hasDungeon && hasNote) {
+                            if (str.contains(": $job") && hasDungeon && hasMember) {
 
                                 foundJobs.add(job)
 
                                 val playerName = PlayerUtils.extractPlayerName(str)
 
-                                val cataLevel = Manager.getCachedLevel(playerName)
+                                val cataLevel = Manager.getCachedCataLevel(playerName)
                                 val secrets = Manager.getCachedSecret(playerName)
                                 val secretAverage = Manager.getCachedSecretAve(playerName)
 
@@ -73,13 +73,25 @@ object partyFinder : Feature("partyFinder") {
 
                                 if (cataLevel != null) {
 
-                                    lines[i] = line.copy().append(
-                                        Component.literal(
-                                            " §b(§6$cataLevel§r§b) " +
-                                                    "§8[§r§a$secrets§r§8/§r§b$secretAverage§r§8] " +
-                                                    "§r§8[§r§9${pbStr ?: "?"}§r§8]§r"
+                                    val isApiDisabled =
+                                        cataLevel == 0.0 &&
+                                        secrets == 0 &&
+                                        secretAverage == 0.0 &&
+                                        pbStr == "0:00"
+
+                                    if (isApiDisabled) {
+                                        lines[i] = line.copy().append(
+                                            Component.literal(" §c[Disable API]")
                                         )
-                                    )
+                                    } else {
+                                        lines[i] = line.copy().append(
+                                            Component.literal(
+                                                " §b(§6$cataLevel§r§b) " +
+                                                        "§8[§r§a$secrets§r§8/§r§b$secretAverage§r§8] " +
+                                                        "§r§8[§r§9${pbStr ?: "?"}§r§8]§r"
+                                            )
+                                        )
+                                    }
 
                                 } else {
 
@@ -97,7 +109,7 @@ object partyFinder : Feature("partyFinder") {
                 }
             }
 
-            if (hasDungeon && hasNote) {
+            if (hasDungeon && hasMember) {
                 val missingJobs = jobs.toMutableSet()
                 missingJobs.removeAll(foundJobs)
 
