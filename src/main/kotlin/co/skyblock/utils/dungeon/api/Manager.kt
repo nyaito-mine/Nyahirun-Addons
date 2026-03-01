@@ -95,7 +95,9 @@ object Manager {
 
                     val classLV = mutableMapOf<String, Double>()
 
-                    val classJson = root.getAsJsonObject("Class")
+                    val classJson = root
+                        .getAsJsonObject("Class")
+                        .getAsJsonObject("Classes")
 
                     for ((key, value) in classJson.entrySet()) {
                         val obj = value.asJsonObject
