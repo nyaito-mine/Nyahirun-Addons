@@ -1,6 +1,7 @@
 package co.skyblock.features.nyahirunaddons.na1.partyfinder
 
 import co.skyblock.events.core.ItemTooltipEvent
+import co.skyblock.utils.EventUtils
 import co.stellarskys.stella.annotations.Module
 import co.stellarskys.stella.features.Feature
 import co.stellarskys.stella.utils.config
@@ -16,19 +17,18 @@ object partyFinder : Feature("partyFinder") {
     val partyFinderHighlightCanJoinConfig by config.property<Color>("partyFinderHighlightCanJoin")
     val partyFinderHighlightCantJoinConfig by config.property<Color>("partyFinderHighlightCantJoin")
 
+    private val canWrite = EventUtils.canWrite
+    private val readOnly = EventUtils.readOnly
+
     override fun initialize() {
-
-        val jobs = listOf("Archer", "Berserk", "Mage", "Tank", "Healer")
-
         on<ItemTooltipEvent.Line> { event ->
-
             if (partyFinderConfig == 0 || partyFinderConfig == 2) return@on
 
             val lines = event.lines
-            var currentDungeon = ""
-            var currentFloor = ""
-            var hasDungeon = false
-            var hasMember = false
+
+            canWrite.hasDungeon = false
+            canWrite.hasFloor = false
+            canWrite.hasMember = false
 
             val foundJobs = mutableSetOf<String>()
 
@@ -39,22 +39,23 @@ object partyFinder : Feature("partyFinder") {
 
                 when {
                     str.startsWith("Dungeon:") -> {
-                        currentDungeon = str.removePrefix("Dungeon:").trim()
-                        hasDungeon = true
+                        canWrite.currentDungeon = str.removePrefix("Dungeon:").trim()
+                        canWrite.hasDungeon = true
                     }
 
                     str.startsWith("Floor:") -> {
-                        currentFloor = str.removePrefix("Floor:").trim()
+                        canWrite.currentFloor = str.removePrefix("Floor:").trim()
+                        canWrite.hasFloor = true
                     }
 
                     str.startsWith("Members:") -> {
-                        hasMember = true
+                        canWrite.hasMember = true
                     }
 
                     str.contains(":") -> {
 
-                        for (job in jobs) {
-                            if (str.contains(": $job") && hasDungeon && hasMember) {
+                        for (job in readOnly.jobs) {
+                            if (str.contains(": $job") && canWrite.hasDungeon && canWrite.hasFloor && canWrite.hasMember) {
 
                                 foundJobs.add(job)
 
@@ -64,10 +65,10 @@ object partyFinder : Feature("partyFinder") {
                                 val secrets = Manager.getCachedSecret(playerName)
                                 val secretAverage = Manager.getCachedSecretAve(playerName)
 
-                                val floorKey = convertFloorToKey(currentFloor)
+                                val floorKey = convertFloorToKey(canWrite.currentFloor)
                                 val pbStr = Manager.getCachedPBString(
                                     playerName,
-                                    currentDungeon,
+                                    canWrite.currentDungeon,
                                     floorKey
                                 )
 
@@ -95,7 +96,7 @@ object partyFinder : Feature("partyFinder") {
 
                                 } else {
 
-                                    if (!Manager.isFetching(playerName)) {
+                                    if (!Manager.hasValidCache(playerName) || !Manager.isFetching(playerName)) {
                                         Manager.fetchAsync(playerName)
                                     }
 
@@ -109,8 +110,8 @@ object partyFinder : Feature("partyFinder") {
                 }
             }
 
-            if (hasDungeon && hasMember) {
-                val missingJobs = jobs.toMutableSet()
+            if (canWrite.hasDungeon && canWrite.hasFloor && canWrite.hasMember) {
+                val missingJobs = readOnly.jobs.toMutableSet()
                 missingJobs.removeAll(foundJobs)
 
                 if (missingJobs.isNotEmpty()) {
