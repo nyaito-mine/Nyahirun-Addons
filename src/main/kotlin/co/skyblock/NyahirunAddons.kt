@@ -2,6 +2,7 @@ package co.skyblock
 
 import co.skyblock.events.EventBusAddons
 import co.skyblock.events.compat.SkyblockAPI
+import co.skyblock.utils.AddonCommand
 import co.skyblock.utils.ConfigAddons
 import net.fabricmc.api.ClientModInitializer
 //import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
@@ -12,11 +13,13 @@ class NyahirunAddons : ClientModInitializer {
         ConfigAddons
         SkyblockAPI
         EventBusAddons
+        AddonCommand
 
         val NA1FeatureList = listOf(
             co.skyblock.features.nyahirunaddons.na1.partyfinder.partyFinder,
             co.skyblock.features.nyahirunaddons.na1.partyfinder.autoKick,
             co.skyblock.features.nyahirunaddons.na1.partyfinder.playerStats,
+            co.skyblock.features.nyahirunaddons.na1.partyfinder.listStats,
 
             co.skyblock.features.nyahirunaddons.na1.general.usePetHighlight,
             co.skyblock.features.nyahirunaddons.na1.general.efficientDB,
@@ -29,6 +32,8 @@ class NyahirunAddons : ClientModInitializer {
 
             co.skyblock.features.nyahirunaddons.na1.disableUse.secondSoulSand,
             co.skyblock.features.nyahirunaddons.na1.disableUse.placeTuba,
+            co.skyblock.features.nyahirunaddons.na1.disableUse.placeBOL,
+            co.skyblock.features.nyahirunaddons.na1.disableUse.placeSceptre,
             co.skyblock.features.nyahirunaddons.na1.disableUse.sbMenu
             )
 
