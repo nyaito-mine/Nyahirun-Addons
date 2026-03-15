@@ -6,11 +6,10 @@ import co.stellarskys.stella.events.core.TickEvent
 import co.stellarskys.stella.features.Feature
 import co.stellarskys.stella.utils.config
 import co.skyblock.events.core.PartyFinderEvent
+import co.skyblock.utils.EventUtils
 import co.skyblock.utils.dungeon.api.Manager
 import net.minecraft.client.Minecraft
-import tech.thatgravyboat.skyblockapi.api.area.dungeon.DungeonFloor
 import tech.thatgravyboat.skyblockapi.utils.text.TextProperties.stripped
-import java.util.UUID
 
 @Module
 object autoKick : Feature("autoKick") {
@@ -19,18 +18,13 @@ object autoKick : Feature("autoKick") {
     val m7TimeConfig by config.property<String>("m7Time")
     val otherFloorTimeConfig by config.property<String>("otherFloorTime")
 
-    private var inQueue = false
-    private var canAutoKick = false
-    private var lastMembers: Set<UUID> = emptySet()
-    private var currentFloor: DungeonFloor? = null
-
-    private val regexJoin =
-        Regex("""Party Finder > (\w+) joined the dungeon group!""")
-
     private data class ScheduledTask(
         var ticksLeft: Int,
         val action: () -> Unit
     )
+
+    private val canWrite = EventUtils.canWrite
+    private val readOnly = EventUtils.readOnly
 
     private val scheduledTasks = mutableListOf<ScheduledTask>()
 
@@ -48,9 +42,9 @@ object autoKick : Feature("autoKick") {
         }
 
         on<PartyFinderEvent.Queue> { event ->
-            inQueue = true
-            canAutoKick = true
-            currentFloor = event.floor
+            canWrite.inQueue = true
+            canWrite.canAutoKick = true
+            canWrite.currentFloor = event.floor.toString()
         }
 
         on<PartyFinderEvent.Leave> {
@@ -59,8 +53,8 @@ object autoKick : Feature("autoKick") {
 
         on<PartyFinderEvent.PartyInfo> { event ->
             if (!event.inParty) {
-                canAutoKick = false
-                lastMembers = emptySet()
+                canWrite.canAutoKick = false
+                canWrite.lastMembers = emptySet()
                 return@on
             }
 
@@ -71,17 +65,21 @@ object autoKick : Feature("autoKick") {
             if (memberCount >= 2) {
                 val myMember = members[myUuid]
                 val isLeader = myMember?.role?.name == "LEADER"
-                canAutoKick = isLeader
+                canWrite.canAutoKick = isLeader
             }
         }
 
         on<ChatEvent.Receive> { event ->
-            if (!inQueue) return@on
-            if (!canAutoKick) return@on
-
             val msg = event.message.stripped
 
-            regexJoin.find(msg)?.let {
+            readOnly.regexPFEnter.find(msg)?.let {
+                resetState()
+            }
+
+            if (!canWrite.inQueue) return@on
+            if (!canWrite.canAutoKick) return@on
+
+            readOnly.regexJoin.find(msg)?.let {
                 val name = it.groupValues[1]
                 checkPlayerByName(name)
             }
@@ -90,14 +88,14 @@ object autoKick : Feature("autoKick") {
 
     private fun checkPlayerByName(name: String) {
 
-        val floor = currentFloor ?: return
+        val floor = canWrite.currentFloor
         val floorKey = getFloorKey(floor)
         val dungeonName = getDungeonName(floor)
 
         val pbStr = Manager.getCachedPBString(name, dungeonName, floorKey)
 
         if (pbStr == null) {
-            if (!Manager.isFetching(name)) {
+            if (!Manager.hasValidCache(name) || !Manager.isFetching(name)) {
                 Manager.fetchAsync(name) {
                     val newPb = Manager.getCachedPBString(name, dungeonName, floorKey)
                     Minecraft.getInstance().execute {
@@ -116,7 +114,7 @@ object autoKick : Feature("autoKick") {
         if (pbStr == null) return
 
         if (pbStr == "No Times") {
-            sendCommand("pc [NA] Kicking $name ($currentFloor - No S+ Time)")
+            sendCommand("pc [NA] Kicking $name (${canWrite.currentFloor} - No S+ Time)")
             runLater(7) { sendCommand("p kick $name") }
             return
         }
@@ -126,35 +124,33 @@ object autoKick : Feature("autoKick") {
         val reqStr = getRequiredTime()
 
         if (pbSeconds != null && reqSeconds != null && pbSeconds > reqSeconds) {
-            sendCommand("pc [NA] Kicking $name ($currentFloor - PB: $pbStr | Req: $reqStr)")
+            sendCommand("pc [NA] Kicking $name (${canWrite.currentFloor} - PB: $pbStr | Req: $reqStr)")
             runLater(7) { sendCommand("p kick $name") }
         }
     }
 
-    private fun getFloorKey(floor: DungeonFloor): String {
-        val name = floor.name.lowercase()
-
+    private fun getFloorKey(floor: String): String {
         return when {
-            name.contains("7") -> "floor_7"
-            name.contains("6") -> "floor_6"
-            name.contains("5") -> "floor_5"
-            name.contains("4") -> "floor_4"
-            name.contains("3") -> "floor_3"
-            name.contains("2") -> "floor_2"
-            name.contains("1") -> "floor_1"
+            floor.contains("7") -> "floor_7"
+            floor.contains("6") -> "floor_6"
+            floor.contains("5") -> "floor_5"
+            floor.contains("4") -> "floor_4"
+            floor.contains("3") -> "floor_3"
+            floor.contains("2") -> "floor_2"
+            floor.contains("1") -> "floor_1"
             else -> ""
         }
     }
 
-    private fun getDungeonName(floor: DungeonFloor): String {
-        return if (floor.name.contains("M", true))
+    private fun getDungeonName(floor: String): String {
+        return if (floor.contains("M", true))
             "Master Mode The Catacombs"
         else
             "The Catacombs"
     }
 
     private fun getRequiredSeconds(): Int? {
-        val floor = currentFloor ?: return null
+        val floor = canWrite.currentFloor
         val floorKey = getFloorKey(floor)
         val dungeon = getDungeonName(floor)
 
@@ -169,7 +165,7 @@ object autoKick : Feature("autoKick") {
     }
 
     private fun getRequiredTime(): String {
-        val floor = currentFloor ?: return ""
+        val floor = canWrite.currentFloor
         val floorKey = getFloorKey(floor)
         val dungeon = getDungeonName(floor)
 
@@ -192,7 +188,7 @@ object autoKick : Feature("autoKick") {
         return minutes * 60 + seconds
     }
 
-    private fun runLater(ticks: Int, action: () -> Unit) {
+    fun runLater(ticks: Int, action: () -> Unit) {
         scheduledTasks.add(ScheduledTask(ticks, action))
     }
 
@@ -201,8 +197,8 @@ object autoKick : Feature("autoKick") {
     }
 
     private fun resetState() {
-        inQueue = false
-        canAutoKick = false
-        currentFloor = null
+        canWrite.inQueue = false
+        canWrite.canAutoKick = false
+        canWrite.currentFloor = ""
     }
 }

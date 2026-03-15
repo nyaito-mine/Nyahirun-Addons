@@ -5,6 +5,8 @@ import co.stellarskys.stella.events.core.ChatEvent
 import co.stellarskys.stella.features.Feature
 import co.skyblock.events.core.ItemTooltipEvent
 import co.skyblock.events.core.PartyFinderEvent
+import co.skyblock.utils.ApiResultsProvider.getAPIResults
+import co.skyblock.utils.EventUtils
 import co.skyblock.utils.dungeon.api.Manager
 import dev.deftu.omnicore.api.client.client
 import net.minecraft.network.chat.ClickEvent
@@ -15,29 +17,17 @@ import tech.thatgravyboat.skyblockapi.utils.text.TextProperties.stripped
 @Module
 object playerStats : Feature("playerStats") {
 
-    private var useFloor = ""
-    private var useFloorNumber = ""
-
-    private var inQueue = false
-    private var queueFloor = ""
-    private var queueFloorNumber = ""
-
-    private var canUpdateFloor = true
-
-    private val leftPartyTrigger = "you left the party."
-    private val removePartyTrigger = "party finder > your group has been removed from the party finder!"
-    private val disbandPartyTrigger = "the party was disbanded because all invites expired and the party was empty."
-    private val regexJoin =
-        Regex("""Party Finder > (\w+) joined the dungeon group!""")
+    private val canWrite = EventUtils.canWrite
+    private val readOnly = EventUtils.readOnly
 
     override fun initialize() {
         on<ItemTooltipEvent.Line> { event ->
-            if (!canUpdateFloor) return@on
+            if (!canWrite.canUpdateFloor) return@on
             val lines = event.lines
-            var currentFloor = ""
-            var hasDungeon = false
-            var hasFloor = false
-            var hasMember = false
+
+            canWrite.hasDungeon = false
+            canWrite.hasFloor = false
+            canWrite.hasMember = false
 
             for (i in lines.indices) {
 
@@ -46,32 +36,32 @@ object playerStats : Feature("playerStats") {
 
                 when {
                     str.startsWith("Dungeon:") -> {
-                        hasDungeon = true
+                        canWrite.hasDungeon = true
                     }
 
                     str.startsWith("Floor:") -> {
-                        hasFloor = true
-                        currentFloor = str.removePrefix("Floor:").trim()
+                        canWrite.hasFloor = true
+                        canWrite.currentFloor = str.removePrefix("Floor:").trim()
                     }
 
                     str.startsWith("Members:") -> {
-                        hasMember = true
+                        canWrite.hasMember = true
                     }
                 }
             }
 
-            if (hasDungeon && hasFloor && hasMember) {
-                useFloor = convertFloorToKey(currentFloor)
-                useFloorNumber = convertFloorToNumber(currentFloor)
+            if (canWrite.hasDungeon && canWrite.hasFloor && canWrite.hasMember) {
+                canWrite.useFloor = convertFloorToKey(canWrite.currentFloor)
+                canWrite.useFloorNumber = convertFloorToNumber(canWrite.currentFloor)
             }
         }
 
         on<ChatEvent.Receive> { event ->
             val msg = event.message.stripped
 
-            if (msg == leftPartyTrigger || msg == removePartyTrigger || msg == disbandPartyTrigger) canUpdateFloor = true
+            if (msg == readOnly.leftPartyTrigger || msg == readOnly.removePartyTrigger || msg == readOnly.disbandPartyTrigger) canWrite.canUpdateFloor = true
 
-            regexJoin.find(msg)?.let {
+            readOnly.regexJoin.find(msg)?.let {
                 val name = it.groupValues[1]
                 val clientName = client.player?.name?.stripped.toString()
                 if (name == clientName) return@on
@@ -80,31 +70,31 @@ object playerStats : Feature("playerStats") {
         }
 
         on<PartyFinderEvent.Queue> { event ->
-            inQueue = true
+            canWrite.inQueue = true
             val floor = event.floor.toString()
-            queueFloor = convertFloorToKey(floor)
-            queueFloorNumber = convertFloorToNumber(floor)
+            canWrite.queueFloor = convertFloorToKey(floor)
+            canWrite.queueFloorNumber = convertFloorToNumber(floor)
         }
 
         on<PartyFinderEvent.Leave> {
-            inQueue = false
+            canWrite.inQueue = false
         }
 
         on<PartyFinderEvent.PartyInfo> {event ->
             val inParty = event.inParty
-            if (inParty) canUpdateFloor = false
+            if (inParty) canWrite.canUpdateFloor = false
         }
     }
 
     private fun getAPIAndChat(name: String) {
         var floor: String
         var floorNumber: String
-        if (inQueue) {
-            floor = queueFloor
-            floorNumber = queueFloorNumber
+        if (canWrite.inQueue) {
+            floor = canWrite.queueFloor
+            floorNumber = canWrite.queueFloorNumber
         } else {
-            floor = useFloor
-            floorNumber = useFloorNumber
+            floor = canWrite.useFloor
+            floorNumber = canWrite.useFloorNumber
         }
         if (floor.isBlank()) return
 
@@ -129,30 +119,27 @@ object playerStats : Feature("playerStats") {
                 )
             }
 
-        val cataLevel = Manager.getCachedCataLevel(name)
-        val secrets = Manager.getCachedSecret(name)
-        val secretAverage = Manager.getCachedSecretAve(name)
+        var apis = getAPIResults(name)
         val floorPBStr = Manager.getCachedPBString(name, "The Catacombs", floor)
         val masterPBStr = Manager.getCachedPBString(name, "Master Mode The Catacombs", floor)
-        val magicalPower = Manager.getCachedMagicalPower(name)
-        val sbLevel = Manager.getCachedSBLevel(name)
 
-        if (cataLevel == null) {
-            if (!Manager.isFetching(name)) {
+        if (apis.cataLevel == null) {
+            client.player?.displayClientMessage(
+                Component.literal("§e[NA] Debug -> Player Stats cataLevel Null getAPI"),
+                false
+            )
+            if (!Manager.hasValidCache(name) || !Manager.isFetching(name)) {
                 Manager.fetchAsync(name) {
-                    val newCataLevel = Manager.getCachedCataLevel(name)
-                    val newSecrets = Manager.getCachedSecret(name)
-                    val newSecretAverage = Manager.getCachedSecretAve(name)
-                    val newFloorPBStr = Manager.getCachedPBString(name, "The Catacombs", floor)
+                    apis = getAPIResults(name)
+                    val newfloorPBStr = Manager.getCachedPBString(name, "The Catacombs", floor)
                     val newMasterPBStr = Manager.getCachedPBString(name, "Master Mode The Catacombs", floor)
-                    val newMagicalPower = Manager.getCachedMagicalPower(name)
-                    val newSBLevel = Manager.getCachedSBLevel(name)
+
                     client.execute {
                         val message = header
                             .append("\n")
-                            .append(Component.literal("§fLevel ${newSBLevel} §fCata §b${newCataLevel} §fMP §d${newMagicalPower}\n"))
-                            .append(Component.literal("§fPB §2F${floorNumber} ${newFloorPBStr} §f| §4M${floorNumber} ${newMasterPBStr}\n"))
-                            .append(Component.literal("§fSecret §e${newSecrets}§f(§6${newSecretAverage}§f/Run)\n"))
+                            .append(Component.literal("§fLevel ${apis.sbLevel} §fCata §b${apis.cataLevel} §fMP §d${apis.magicalPower}\n"))
+                            .append(Component.literal("§fPB §2F${floorNumber} ${newfloorPBStr} §f| §4M${floorNumber} ${newMasterPBStr}\n"))
+                            .append(Component.literal("§fSecret §e${apis.secrets}§f(§6${apis.secretAverage}§f/Run)\n"))
                             .append(kick)
                             .append(Component.literal("§f/"))
                             .append(reinvite)
@@ -166,9 +153,9 @@ object playerStats : Feature("playerStats") {
 
         val message = header
             .append("\n")
-            .append(Component.literal("§fLevel ${sbLevel} §fCata §b${cataLevel} §fMP §d${magicalPower}\n"))
+            .append(Component.literal("§fLevel ${apis.sbLevel} §fCata §b${apis.cataLevel} §fMP §d${apis.magicalPower}\n"))
             .append(Component.literal("§fPB §2F${floorNumber} ${floorPBStr} §f| §4M${floorNumber} ${masterPBStr}\n"))
-            .append(Component.literal("§fSecret §e${secrets}§f(§6${secretAverage}§f/Run)\n"))
+            .append(Component.literal("§fSecret §e${apis.secrets}§f(§6${apis.secretAverage}§f/Run)\n"))
             .append(kick)
             .append(Component.literal("§f/"))
             .append(reinvite)
