@@ -14,3 +14,8 @@ data class ListEntryStringInt(
     val string: String,
     val int: Int = 0,
 )
+
+data class ListEntryStringColorInt(
+    val string: String,
+    val color: Int = 0xFF404040.toInt()
+)

@@ -88,6 +88,13 @@ object ConfigAddons { // オブジェクトにまとめる
                     description = "Enable Player Stats"
                     default = false
                 }
+
+                toggle {
+                    configName = "listStats"
+                    name = "List Stats"
+                    description = "Enable List Stats [/pl, /party list]"
+                    default = false
+                }
             }
 
             subcategory("AutoRefill", "autoRefill", "Enables AutoRefill in dungeon") {
@@ -197,6 +204,20 @@ object ConfigAddons { // オブジェクトにまとめる
                     configName = "disableUsePlaceTuba"
                     name = "Place Tuba"
                     description = "Disable Use Place Tuba(In Dungeon)"
+                    default = false
+                }
+
+                toggle {
+                    configName = "disableUsePlaceBOL"
+                    name = "Place BOL"
+                    description = "Disable Use Place BOL(In Dungeon)"
+                    default = false
+                }
+
+                toggle {
+                    configName = "disableUsePlaceSceptre"
+                    name = "Place Sceptre"
+                    description = "Disable Use Place Sceptre(In Dungeon)"
                     default = false
                 }
 
