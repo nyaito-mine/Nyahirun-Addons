@@ -1,55 +1,242 @@
-# Stella Addon
+<div align="center">
 
-A [Stella](https://github.com/Eclipse-5214/stella) addon — built on the same Fabric/Kotlin/Stonecutter stack, consuming Stella as a library dependency instead of duplicating its framework.
+# Nyahirun Addons
 
-See [API.md](API.md) for a reference of the Stella APIs available to addons (modules, config DSL, commands, events, handlers, rendering), with short usage examples. Look there before reaching for KDoc.
+Nyahirun Addons is a Minecraft Mod for Hypixel Skyblock Dungeon.
 
-## Structure
+## This is Stella Addon
 
-```
-src/main/kotlin/co/stellarskys/stellaaddon/
-  StellaAddon.kt        client entrypoint
-  features/             @Module feature classes
-  commands/             @Command Atlas command classes
-```
+![Mod Icon](https://cdn.modrinth.com/data/cached_images/50c79be2d52c4c6da9e9fc431e96abd34589bccd_0.webp)
 
-## Setup
+</div>
 
-**Prerequisites:**
+---
 
-- JDK 25 (Temurin recommended — matches CI)
-- Git
+<div align="center">
 
-**Get the source:**
+## Require Mod
 
-```
-git clone https://github.com/Eclipse-5214/stella-addon.git
-cd stella-addon
-```
+Stella: [Github Link](https://github.com/Eclipse-5214/stella) / [Modrinth Link](https://modrinth.com/mod/stella)
 
-Stella itself isn't cloned alongside this repo — it's pulled as a versioned dependency from JitPack (`gradle/libs.versions.toml`, `stella = "<commit>"`). Bump that line to pick up newer Stella commits.
+Require Version: Beta 1.0.5 Beta↑
 
-**Run a dev client:**
+</div>
 
-```
-./gradlew runClient
-```
+---
 
-Builds against whichever Minecraft version Stonecutter has active (`stonecutter active "..."` in `stonecutter.gradle.kts`, currently `26.1`) and launches Minecraft with the addon (and Stella) loaded, using DevAuth so you don't need a real session.
+<div align="center">
 
-**IDE:**
+## Features
 
-Open the repo root in IntelliJ — Loom generates run configs automatically (`ideConfigGenerated(true)`). The [Stonecutter IntelliJ plugin](https://stonecutter.kikugie.dev/stonecutter/setup) makes switching/managing active MC versions easier if you ever add more.
+</div>
 
-## Building
+### StellaNav
+<details>
+<summary>Extra</summary>
 
-```
-./gradlew build
-```
+- -NA- Doors Fill
+    - -NA- Key Fill Color
+    - -NA- No Key Fill Color
 
-Targets the Minecraft version Stonecutter is currently active on (`stonecutter.gradle.kts`). Output jars land in `build/libs/<version>/`.
+</details>
 
-## Requirements
+### -NA- General
+<details>
+<summary>NonCategory</summary>
 
-- Stella installed alongside this addon (declared in `fabric.mod.json` as a hard dependency)
-- Fabric API + Fabric Language Kotlin
+- Use Pet Highlight
+    - Pet Color
+- Efficient DB
+- Protect Item Mark
+
+</details>
+
+<details>
+<summary>Disable Use</summary>
+
+- Second Soul Sand
+- Place Tuba
+- Place Sceptre
+- Place BOL
+- Place Head
+- SBMenu
+
+</details>
+
+<details>
+<summary>Chat Hider</summary>
+
+- Obtained
+- MileStone
+- KillCombo
+- Boss
+- NPCMort
+- TeleportCooldown
+- Implosion
+- TrapRoom
+- Lever
+- Chest
+- IcePath
+- MysticalForce
+- LostAdventure
+- Essence
+- Blessing
+
+</details>
+
+### -NA- Dungeons
+<details>
+<summary>Party Finder</summary>
+
+- Party Finder(-, MoreInfo, Highlight, Both)
+    - CanJoin(Highlight, Both)
+    - CantJoin(Highlight, Both)
+- Auto Kick
+    - F7 Time
+    - M7 Time
+    - F1~F6 M1~M6 Time
+- Player Stats
+- List Stats
+
+</details>
+
+<details>
+<summary>AutoRefill</summary>
+
+- Ender Pearl
+- SuperboomTNT
+- Spirit Leap
+- Inflatable Jerry
+- Decoy
+- TAP
+    - TAP Archer
+    - TAP Berserk
+    - TAP Mage
+    - TAP Healer
+    - TAP Tank
+
+</details>
+
+<details>
+<summary>RenderHighlight</summary>
+
+- Secret Item
+    - Secret Item Color
+    - Secret Item Scale
+- Wither
+    - Wither Color Line
+    - Wither Color Face
+    - Wither Scale
+    - Goldor Tracer
+    - Goldor Tracer Color
+- Mimic Chest
+    - Mimic Chest Color Line
+    - Mimic Chest Color Face
+- Starred Mob
+    - StarredMob Color Line
+    - Starred Mob Fill
+        - Starred Mob Color Face
+    - Starred Mob Scale
+
+</details>
+
+<details>
+<summary>Notification</summary>
+
+- Enraged Wish
+- Gate Broke
+- Core Leap
+- Necron Leap
+- Ragnarock
+- ChestLock
+- Mask
+- Key Pick
+
+</details>
+
+<details>
+<summary>Terminal Solver</summary>
+
+- Colors
+- Names
+- Panes
+- Numbers
+- Rubix
+- Melody
+- First Click Delay
+- GUI Scale
+- Slots Scale
+- GUI Roundness
+- GUI Hide Title
+- GUI Slots Fill
+- GUI Slots Roundness
+- Numbers Show Text
+- Terminal Sound
+    - Sound Name
+    - Sound Volume
+    - Sound Pitch
+
+</details>
+
+<details>
+<summary>Terminal Color</summary>
+
+- GUI Background
+- GUI Border Color
+- Header Color
+- Title Color
+- Colors Solution
+- Names Solution
+- Panes Solution
+- Numbers 1st
+- Numbers 2nd
+- Numbers 3rd
+- Rubix Positive
+- Rubix Negative
+- Melody Fill
+- Melody Correct
+- Melody Wrong
+- Melody Other
+
+</details>
+
+### Other
+- Protect Item
+- Command Keys
+
+---
+
+<div align="center">
+
+## Installation
+
+</div>
+
+1. Install Fabric 1.21.11
+2. Download this mod and Stella
+3. Place the mod jar files into your mods folder
+4. Use /stella to configure features
+5. Enjoy Dungeon!
+
+***
+
+<div align="center">
+
+## Credits
+
+</div>
+
+- [Stella](https://github.com/Eclipse-5214/stella)
+- [StellaAddon](https://github.com/Eclipse-5214/StellaAddon)
+- [SBD](https://github.com/Evankhell0/sbd) inspired Party Finder
+- [Athen](https://github.com/skies-starred/Athen) Terminal Solver
+- [Skyblocker](https://modrinth.com/mod/skyblocker-liap) Protect Item
+
+
+- [HypixelAPI](https://developer.hypixel.net/) using Party Finder
+- [CloudFlare](https://www.cloudflare.com/) cached API data
+
+
+- [GitHub Copilot](https://github.com/features/copilot) Thanks Code (This mod use AI)
+
+***
