@@ -12,18 +12,18 @@
         "sources": "https://github.com/Eclipse-5214/stella-addon"
     },
     "license": "LGPL-3.0-or-later",
-    "icon": "assets/stella-addon/icon.png",
+    "icon": "assets/nyahirun-addons/icon.png",
     "environment": "*",
     "entrypoints": {
         "client": [
             {
-                "value": "co.stellarskys.stellaaddon.StellaAddon",
+                "value": "co.stellarskys.nyahirunaddons.NyahirunAddons",
                 "adapter": "kotlin"
             }
         ]
     },
     "mixins": [
-        "stella-addon.mixins.json"
+        "nyahirun-addons.mixins.json"
     ],
     "depends": {
         "minecraft": "${minecraft}",

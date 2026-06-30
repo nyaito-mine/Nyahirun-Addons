@@ -1,6 +1,6 @@
 {
     "required": true,
-    "package": "co.stellarskys.stellaaddon.mixins",
+    "package": "co.stellarskys.nyahirunaddons.mixins",
     "compatibilityLevel": "JAVA_25",
     "injectors": {
         "defaultRequire": 1
