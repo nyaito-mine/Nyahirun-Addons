@@ -4,7 +4,6 @@ import co.stellarskys.nyahirunaddons.events.core.InteractionEvent
 import co.stellarskys.nyahirunaddons.features.general.disableUse.utils.*
 import co.stellarskys.nyahirunaddons.features.DisableUse
 import co.stellarskys.stella.annotations.Module
-import co.stellarskys.stella.api.handlers.Signal.fakeMessage
 import co.stellarskys.stella.events.core.TickEvent
 import co.stellarskys.stella.features.Feature
 import net.minecraft.world.InteractionResult
@@ -23,7 +22,6 @@ object SBMenu : Feature("DisableUse") {
 
     private fun isCorruptedRelic(stack: ItemStack): Boolean {
         val itemName = stack.hoverName.string.lowercase()
-        fakeMessage("Checking item: $itemName")
         return itemName.contains("corrupted") && itemName.contains("relic")
     }
 
@@ -34,7 +32,6 @@ object SBMenu : Feature("DisableUse") {
         on<TickEvent.Client> {
             if (relicTickTime > 0) {
                 relicTickTime--
-                fakeMessage("Corrupted Relic cooldown: $relicTickTime")
             }
         }
 
