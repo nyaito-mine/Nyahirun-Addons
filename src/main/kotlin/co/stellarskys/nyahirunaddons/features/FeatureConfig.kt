@@ -24,7 +24,8 @@ object FeatureConfig {
             name = "NonCategory", category = "-NA General-", features = listOf(
                 ToggleDef(name = "CommandKeys"),
                 ToggleDef(id = "EnableCooldown", name = "[CK] EnableCD", default = true, show = { settings -> settings["NonCategory.CommandKeys"] as Boolean }),
-                ToggleDef(id = "CooldownMessage", name = "[CK] CDMessage", default = false, show = { settings -> settings["NonCategory.CommandKeys"] as Boolean })
+                ToggleDef(id = "CooldownMessage", name = "[CK] CDMessage", default = false, show = { settings -> settings["NonCategory.CommandKeys"] as Boolean }),
+                ToggleDef(name = "EfficientDB")
             )
         ),
         SubcategoryDef(
@@ -262,6 +263,7 @@ object NonCategory {
     val commandKeys get() = enabled("NonCategory.CommandKeys")
     val enabledCooldown get() = enabled("NonCategory.EnableCooldown")
     val cooldownMessage get() = enabled("NonCategory.CooldownMessage")
+    val efficientDB get() = enabled("NonCategory.EfficientDB")
 }
 
 object DisableUse {
