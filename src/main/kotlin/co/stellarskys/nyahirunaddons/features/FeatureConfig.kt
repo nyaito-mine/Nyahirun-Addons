@@ -20,8 +20,15 @@ object FeatureConfig {
     )
 
     private val subcategories = listOf(
-        SubcategoryDef(id = "NonCategory", name = "NonCategory", category = "-NA General-"),
-        SubcategoryDef(id = "DisableUse", name = "Disable Use", category = "-NA General-", features = listOf(
+        SubcategoryDef(
+            name = "NonCategory", category = "-NA General-", features = listOf(
+                ToggleDef(name = "CommandKeys"),
+                ToggleDef(id = "EnableCooldown", name = "[CK] EnableCD", default = true, show = { settings -> settings["NonCategory.CommandKeys"] as Boolean }),
+                ToggleDef(id = "CooldownMessage", name = "[CK] CDMessage", default = false, show = { settings -> settings["NonCategory.CommandKeys"] as Boolean })
+            )
+        ),
+        SubcategoryDef(
+            id = "DisableUse", name = "Disable Use", category = "-NA General-", features = listOf(
                 ToggleDef(name = "Second SoulSand"),
                 ToggleDef(name = "Place Tuba"),
                 ToggleDef(name = "Place BOL"),
@@ -30,7 +37,8 @@ object FeatureConfig {
                 ToggleDef(name = "SBMenu")
             )
         ),
-        SubcategoryDef(id = "ChatHider", name = "Chat Hider", category = "-NA General-", features = listOf(
+        SubcategoryDef(
+            id = "ChatHider", name = "Chat Hider", category = "-NA General-", features = listOf(
                 ToggleDef(name = "Obtained"),
                 ToggleDef(name = "Milestone"),
                 ToggleDef(name = "KillCombo"),
@@ -60,8 +68,9 @@ object FeatureConfig {
         val created = mutableMapOf<String, ConfigSubcategory>()
 
         subcategories.forEach { spec ->
-            val subcategoryId = spec.id ?: spec.name.toConfigKey()
+            var subcategoryId = spec.id ?: ""
             val subcategory = target.subcategory(spec.name, spec.category, subcategoryId, spec.description)
+            subcategoryId = subcategoryId.ifEmpty { spec.name.toConfigKey() }
             spec.features.forEach { feature ->
                 addFeature(subcategory, subcategoryId, feature)
             }
@@ -132,6 +141,7 @@ object FeatureConfig {
                     feature.show
                 )
             }
+
             is SliderDef -> {
                 val key = feature.id ?: feature.name.toConfigKey()
                 subcategory.slider(
@@ -144,6 +154,7 @@ object FeatureConfig {
                     feature.show
                 )
             }
+
             is StepSliderDef -> {
                 val key = feature.id ?: feature.name.toConfigKey()
                 subcategory.stepslider(
@@ -157,6 +168,7 @@ object FeatureConfig {
                     feature.show
                 )
             }
+
             is DropDownDef -> {
                 val key = feature.id ?: feature.name.toConfigKey()
                 subcategory.dropdown(
@@ -168,6 +180,7 @@ object FeatureConfig {
                     feature.show
                 )
             }
+
             is ColorPickerDef -> {
                 val key = feature.id ?: feature.name.toConfigKey()
                 subcategory.colorpicker(
@@ -178,6 +191,7 @@ object FeatureConfig {
                     feature.show
                 )
             }
+
             is TextInputDef -> {
                 val key = feature.id ?: feature.name.toConfigKey()
                 subcategory.textinput(
@@ -189,6 +203,7 @@ object FeatureConfig {
                     feature.onChange
                 )
             }
+
             is KeyBindDef -> {
                 val key = feature.id ?: feature.name.toConfigKey()
                 subcategory.keybind(
@@ -199,6 +214,7 @@ object FeatureConfig {
                     feature.show
                 )
             }
+
             is ButtonDef -> {
                 val key = feature.id ?: feature.name.toConfigKey()
                 subcategory.button {
@@ -209,6 +225,7 @@ object FeatureConfig {
                     onClick = feature.onClick
                 }
             }
+
             is TextParagraphDef -> {
                 val key = feature.id ?: feature.name.toConfigKey()
                 subcategory.textparagraph {
@@ -237,6 +254,14 @@ object SubCategories {
     val notification get() = FeatureConfig.sharedSections.notification
     val terminalSolver get() = FeatureConfig.sharedSections.terminalSolver
     val terminalColor get() = FeatureConfig.sharedSections.terminalColor
+}
+
+object NonCategory {
+    private fun enabled(key: String): Boolean = FeatureConfig.sharedSections.nonCategory.elements[key]?.value as Boolean
+
+    val commandKeys get() = enabled("NonCategory.CommandKeys")
+    val enabledCooldown get() = enabled("NonCategory.EnableCooldown")
+    val cooldownMessage get() = enabled("NonCategory.CooldownMessage")
 }
 
 object DisableUse {
