@@ -12,7 +12,7 @@ import net.minecraft.world.level.block.Blocks.SOUL_SAND
 object SecondSoulSand : Feature("DisableUse") {
     override fun initialize() {
         on<InteractionEvent.PlaceAttempt> { event ->
-            if (!DisableUse.secondSoulSand || !event.isPlacingOnSameBlock(SOUL_SAND)) return@on
+            if (!DisableUse.SecondSoulSand || !event.isPlacingOnSameBlock(SOUL_SAND)) return@on
 
             event.cancelWith(InteractionResult.FAIL)
         }

@@ -12,7 +12,7 @@ import net.minecraft.world.level.block.Blocks.HOPPER
 object PlaceTuba : Feature("DisableUse") {
     override fun initialize() {
         on<InteractionEvent.PlaceAttempt> { event ->
-            if (!DisableUse.placeTuba || !event.isPlacing(HOPPER)) return@on
+            if (!DisableUse.PlaceTuba || !event.isPlacing(HOPPER)) return@on
 
             event.cancelWith(InteractionResult.SUCCESS)
         }

@@ -12,7 +12,7 @@ import net.minecraft.world.level.block.Blocks.PLAYER_HEAD
 object PlaceHead : Feature("DisableUse") {
     override fun initialize() {
         on<InteractionEvent.PlaceAttempt> { event ->
-            if (!DisableUse.placeHead || !event.isPlacing(PLAYER_HEAD)) return@on
+            if (!DisableUse.PlaceHead || !event.isPlacing(PLAYER_HEAD)) return@on
 
             event.cancelWith(InteractionResult.SUCCESS)
         }

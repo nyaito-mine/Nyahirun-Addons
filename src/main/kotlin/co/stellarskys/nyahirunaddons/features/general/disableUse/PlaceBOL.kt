@@ -12,7 +12,7 @@ import net.minecraft.world.level.block.Blocks.ROSE_BUSH
 object PlaceBOL : Feature("DisableUse") {
     override fun initialize() {
         on<InteractionEvent.PlaceAttempt> { event ->
-            if (!DisableUse.placeBOL || !event.isPlacing(ROSE_BUSH)) return@on
+            if (!DisableUse.PlaceBOL || !event.isPlacing(ROSE_BUSH)) return@on
 
             event.cancelWith(InteractionResult.SUCCESS)
         }

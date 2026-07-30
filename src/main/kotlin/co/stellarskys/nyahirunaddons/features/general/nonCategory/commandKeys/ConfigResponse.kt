@@ -4,7 +4,7 @@ import co.stellarskys.nyahirunaddons.config.CommandKeysConfig
 import co.stellarskys.nyahirunaddons.config.CommandKeyEntry
 
 object ConfigResponse {
-    data class Command(
+    data class Entry(
         val id: String,
         val key: String,
         val command: String,
@@ -12,9 +12,9 @@ object ConfigResponse {
         val cooldownTicks: Int
     )
 
-    fun getCommands(): List<Command> {
+    fun getCommands(): List<Entry> {
         return CommandKeysConfig.getEntries().map { entry ->
-            Command(
+            Entry(
                 id = entry.id,
                 key = entry.keyCode,
                 command = entry.command,
@@ -24,38 +24,38 @@ object ConfigResponse {
         }
     }
 
-    fun updateCommand(command: Command) {
+    fun updateCommand(entry: Entry) {
         CommandKeysConfig.update { entries ->
-            val index = entries.indexOfFirst { it.id == command.id }
+            val index = entries.indexOfFirst { it.id == entry.id }
             if (index != -1) {
                 entries[index] = CommandKeyEntry(
-                    id = command.id,
-                    enabled = command.enabled,
-                    keyCode = command.key,
-                    command = command.command,
-                    cooldownTicks = command.cooldownTicks
+                    id = entry.id,
+                    enabled = entry.enabled,
+                    keyCode = entry.key,
+                    command = entry.command,
+                    cooldownTicks = entry.cooldownTicks
                 )
             }
         }
     }
 
-    fun addCommand(command: Command) {
+    fun addCommand(entry: Entry) {
         CommandKeysConfig.update { entries ->
             entries.add(
                 CommandKeyEntry(
-                    id = command.id,
-                    enabled = command.enabled,
-                    keyCode = command.key,
-                    command = command.command,
-                    cooldownTicks = command.cooldownTicks
+                    id = entry.id,
+                    enabled = entry.enabled,
+                    keyCode = entry.key,
+                    command = entry.command,
+                    cooldownTicks = entry.cooldownTicks
                 )
             )
         }
     }
 
-    fun deleteCommand(commandId: String) {
+    fun deleteCommand(id: String) {
         CommandKeysConfig.update { entries ->
-            entries.removeIf { it.id == commandId }
+            entries.removeIf { it.id == id }
         }
     }
 }

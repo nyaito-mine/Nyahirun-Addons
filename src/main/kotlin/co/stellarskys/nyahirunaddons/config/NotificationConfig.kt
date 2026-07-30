@@ -11,17 +11,20 @@ import java.time.format.DateTimeFormatter
 import java.util.UUID
 import kotlin.io.path.exists
 
-data class CommandKeyEntry(
+data class NotificationEntry(
     val id: String = UUID.randomUUID().toString(),
     val enabled: Boolean = true,
-    val keyCode: String = "None",
-    val command: String = "",
-    val cooldownTicks: Int = 4
+    val notification: String = "",
+    val trigger: String = "",
+    val displayTicks: Int = 40,
+    val sound: String = "entity.experience_orb.pickup",
+    val soundVolume: Float = 1.0f,
+    val soundPitch: Float = 0.5f
 )
 
-object CommandKeysConfig {
+object NotificationConfig {
     private const val CONFIG_DIRECTORY_NAME = "nyahirun-addons"
-    private const val FILE_NAME = "command-keys.json"
+    private const val FILE_NAME = "notification.json"
     private const val CURRENT_SCHEMA_VERSION = 1
 
     private val gson = GsonBuilder().setPrettyPrinting().create()
@@ -29,18 +32,18 @@ object CommandKeysConfig {
     private val configPath: Path = configDirectoryPath.resolve(FILE_NAME)
     private val legacyConfigPath: Path = FabricLoader.getInstance().configDir.resolve(FILE_NAME)
 
-    private data class CommandKeysFile(
+    private data class NotificationFile(
         val schemaVersion: Int = CURRENT_SCHEMA_VERSION,
-        val entries: List<CommandKeyEntry> = emptyList()
+        val entries: List<NotificationEntry> = emptyList()
     )
 
-    private var cachedEntries: MutableList<CommandKeyEntry>? = null
+    private var cachedEntries: MutableList<NotificationEntry>? = null
 
-    fun getEntries(): List<CommandKeyEntry> {
+    fun getEntries(): List<NotificationEntry> {
         return getOrLoadEntries().map { it.copy() }
     }
 
-    fun update(transform: (MutableList<CommandKeyEntry>) -> Unit) {
+    fun update(transform: (MutableList<NotificationEntry>) -> Unit) {
         val updated = getOrLoadEntries().toMutableList()
         transform(updated)
         val normalized = normalize(updated)
@@ -48,14 +51,14 @@ object CommandKeysConfig {
         cachedEntries = normalized.toMutableList()
     }
 
-    private fun getOrLoadEntries(): MutableList<CommandKeyEntry> {
+    private fun getOrLoadEntries(): MutableList<NotificationEntry> {
         cachedEntries?.let { return it }
         val loaded = readEntries().toMutableList()
         cachedEntries = loaded
         return loaded
     }
 
-    private fun readEntries(): List<CommandKeyEntry> {
+    private fun readEntries(): List<NotificationEntry> {
         prepareConfigDirectory()
         migrateLegacyFileIfNeeded()
 
@@ -68,7 +71,7 @@ object CommandKeysConfig {
         if (content.isBlank()) return emptyList()
 
         val parsed = runCatching {
-            gson.fromJson(content, CommandKeysFile::class.java)
+            gson.fromJson(content, NotificationFile::class.java)
         }.getOrElse { error ->
             if (error is JsonSyntaxException) {
                 backupBrokenFile()
@@ -79,12 +82,12 @@ object CommandKeysConfig {
         return normalize(parsed.entries)
     }
 
-    private fun saveEntries(entries: List<CommandKeyEntry>) {
+    private fun saveEntries(entries: List<NotificationEntry>) {
         prepareConfigDirectory()
         migrateLegacyFileIfNeeded()
 
         val json = gson.toJson(
-            CommandKeysFile(
+            NotificationFile(
                 schemaVersion = CURRENT_SCHEMA_VERSION,
                 entries = entries
             )
@@ -93,17 +96,19 @@ object CommandKeysConfig {
         Files.writeString(configPath, json, StandardCharsets.UTF_8)
     }
 
-    private fun normalize(entries: List<CommandKeyEntry>): List<CommandKeyEntry> {
+    private fun normalize(entries: List<NotificationEntry>): List<NotificationEntry> {
         return entries.map { raw ->
             val id = raw.id.trim().ifEmpty { UUID.randomUUID().toString() }
-            val command = raw.command.trim()
 
-            CommandKeyEntry(
+            NotificationEntry(
                 id = id,
                 enabled = raw.enabled,
-                keyCode = raw.keyCode,
-                command = command,
-                cooldownTicks = raw.cooldownTicks
+                notification = raw.notification,
+                trigger = raw.trigger,
+                displayTicks = raw.displayTicks,
+                sound = raw.sound,
+                soundVolume = raw.soundVolume,
+                soundPitch = raw.soundPitch
             )
         }
     }

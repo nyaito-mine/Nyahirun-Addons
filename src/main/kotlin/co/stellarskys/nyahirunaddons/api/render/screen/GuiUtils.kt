@@ -1,4 +1,4 @@
-package co.stellarskys.nyahirunaddons.api
+package co.stellarskys.nyahirunaddons.api.render.screen
 
 import co.stellarskys.stella.api.zenith.Zenith.Keys
 import co.stellarskys.stella.api.zenith.Zenith.client
@@ -38,7 +38,7 @@ object GuiUtils {
         "Menu" to Keys.MENU,
 
         "Space" to Keys.SPACE, "Apostrophe" to Keys.APOSTROPHE, "Comma" to Keys.COMMA, "Minus" to Keys.MINUS, "Period" to Keys.PERIOD,
-        "Slash" to Keys.SLASH, "Semicolon" to Keys.SEMICOLON, "Equal" to Keys.EQUAL, "LBracket" to Keys.L_BRACKET, "Backslash" to Keys.BACKSLASH,
+        "Slash" to Keys.SLASH, "Semicolon" to Keys.SEMICOLON, "Equal" to Keys.EQUAL, "LBracket" to Keys.L_BRACKET, "BackSlash" to Keys.BACKSLASH,
         "RBracket" to Keys.R_BRACKET, "GraveAccent" to Keys.GRAVE_ACCENT, "World1" to Keys.WORLD_1, "World2" to Keys.WORLD_2,
 
         "None" to Keys.NONE

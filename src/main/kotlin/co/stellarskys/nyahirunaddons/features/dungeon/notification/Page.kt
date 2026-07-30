@@ -1,4 +1,4 @@
-package co.stellarskys.nyahirunaddons.features.general.nonCategory.commandKeys
+package co.stellarskys.nyahirunaddons.features.dungeon.notification
 
 import co.stellarskys.stella.api.config.ui.Palette
 import co.stellarskys.stella.api.config.ui.Palette.withAlpha
@@ -26,7 +26,7 @@ open class Page : ParentElement() {
             context.pose().translate(x, y)
             ren2d.drawRect(context, 0, 0, width.toInt(), height.toInt(), Palette.Crust.withAlpha(150))
             ren2d.drawHollowRect(context, 0, 0, width.toInt(), height.toInt(), 1, Palette.Sky)
-            ren2d.drawString(context, "Command Keys", 10, 10)
+            ren2d.drawString(context, "Notification", 10, 10)
             onRender(context, mouseX, mouseY, delta)
         }
     }

@@ -12,7 +12,7 @@ import net.minecraft.world.level.block.Blocks.ALLIUM
 object PlaceSceptre : Feature("DisableUse") {
     override fun initialize() {
         on<InteractionEvent.PlaceAttempt> { event ->
-            if (!DisableUse.placeSceptre || !event.isPlacing(ALLIUM)) return@on
+            if (!DisableUse.PlaceSceptre || !event.isPlacing(ALLIUM)) return@on
 
             event.cancelWith(InteractionResult.SUCCESS)
         }

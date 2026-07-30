@@ -1,11 +1,11 @@
-package co.stellarskys.nyahirunaddons.features.general.nonCategory.commandKeys
+package co.stellarskys.nyahirunaddons.features.dungeon.notification
 
 import co.stellarskys.stella.api.zenith.Aperture
 import co.stellarskys.stella.api.zenith.Zenith
 import net.minecraft.client.gui.GuiGraphicsExtractor
 
-class CommandKeysScreen : Aperture("Command Keys") {
-    private val page = CommandKeys()
+class NotificationScreen : Aperture("Notification") {
+    private val page = Notification()
 
     override fun onRender(context: GuiGraphicsExtractor, mouseX: Int, mouseY: Int, tickDelta: Float) {
         page.render(context, mouseX.toFloat(), mouseY.toFloat(), tickDelta)
@@ -32,6 +32,6 @@ class CommandKeysScreen : Aperture("Command Keys") {
         page.screenClose()
 
     companion object {
-        fun open() = Zenith.client.setScreen(CommandKeysScreen())
+        fun open() = Zenith.client.setScreen(NotificationScreen())
     }
 }

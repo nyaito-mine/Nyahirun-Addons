@@ -1,10 +1,11 @@
-package co.stellarskys.nyahirunaddons.api
+package co.stellarskys.nyahirunaddons.api.render.screen
 
 import co.stellarskys.stella.api.config.ui.Palette
 import co.stellarskys.stella.api.horizon.mc.ParentElement
 import net.minecraft.client.gui.GuiGraphicsExtractor
 import org.lwjgl.glfw.GLFW
 import java.awt.Color
+import kotlin.math.abs
 
 object MoreRender2D : ParentElement() {
     private const val MAX_TEXT_LENGTH = 256
@@ -14,7 +15,7 @@ object MoreRender2D : ParentElement() {
         val mouseClickY: Int? = null,
         val mouseButton: Int? = null,
         val keyCode: Int? = null,
-        val typedChar: kotlin.Char? = null,
+        val typedChar: Char? = null,
     )
 
     private data class InputKey(
@@ -147,7 +148,7 @@ object MoreRender2D : ParentElement() {
         var bestDistance = Int.MAX_VALUE
         for (index in 0..text.length) {
             val candidateX = textStartX + GuiUtils.getWidth(text.take(index))
-            val distance = kotlin.math.abs(candidateX - mouseX)
+            val distance = abs(candidateX - mouseX)
             if (distance < bestDistance) {
                 bestDistance = distance
                 bestIndex = index

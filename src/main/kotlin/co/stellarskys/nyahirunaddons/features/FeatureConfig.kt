@@ -2,6 +2,7 @@ package co.stellarskys.nyahirunaddons.features
 
 import co.stellarskys.stella.api.config.core.Config
 import co.stellarskys.stella.api.config.core.ConfigSubcategory
+import java.awt.Color
 
 object FeatureConfig {
     internal lateinit var sharedSections: Sections
@@ -59,7 +60,33 @@ object FeatureConfig {
         ),
         SubcategoryDef(id = "PartyFinder", name = "Party Finder", category = "-NA Dungeon-"),
         SubcategoryDef(id = "AutoRefill", name = "Auto Refill", category = "-NA Dungeon-"),
-        SubcategoryDef(id = "RenderHighlight", name = "Render Highlight", category = "-NA Dungeon-"),
+        SubcategoryDef(
+            id = "RenderHighlight", name = "Render Highlight", category = "-NA Dungeon-", features = listOf(
+                ToggleDef(name = "Secret Item"),
+                ColorPickerDef(id = "SecretItemColor", name = "[SI] Color", default = Color(0, 255, 0, 255), show = { settings -> settings["RenderHighlight.SecretItem"] as Boolean }),
+                StepSliderDef(id = "SecretItemScale", name = "[SI] Scale", min = 0, max = 6, step = 1, default = 2, show = { settings -> settings["RenderHighlight.SecretItem"] as Boolean }),
+                ToggleDef(name = "Bat"),
+                ColorPickerDef(id = "BatLineColor", name = "[Ba] Line Color", default = Color(255, 0, 255, 255), show = { settings -> settings["RenderHighlight.Bat"] as Boolean }),
+                ColorPickerDef(id = "BatFillColor", name = "[Ba] Fill Color", default = Color(255, 0, 255, 153), show = { settings -> settings["RenderHighlight.Bat"] as Boolean }),
+                ToggleDef(id = "BatTracer", name = "[Ba] Tracer", show = { settings -> settings["RenderHighlight.Bat"] as Boolean }),
+                ColorPickerDef(id = "BatTracerColor", name = "[Ba:T] Color", default = Color(255, 0, 255, 255), show = { settings -> settings["RenderHighlight.BatTracer"] as Boolean }),
+                StepSliderDef(id = "BatScale", name = "[Ba] Scale", min = 0, max = 6, step = 1, default = 0, show = { settings -> settings["RenderHighlight.Bat"] as Boolean }),
+                ToggleDef(name = "Wither"),
+                ColorPickerDef(id = "WitherLineColor", name = "[Wi] Line Color", default = Color(0, 255, 255, 255), show = { settings -> settings["RenderHighlight.Wither"] as Boolean }),
+                ColorPickerDef(id = "WitherFillColor", name = "[Wi] Fill Color", default = Color(0, 255, 255, 153), show = { settings -> settings["RenderHighlight.Wither"] as Boolean }),
+                StepSliderDef(id = "WitherScale", name = "[Wi] Scale", min = 0, max = 6, step = 1, default = 0, show = { settings -> settings["RenderHighlight.Wither"] as Boolean }),
+                ToggleDef(id = "WitherGoldorTracer", name = "[Wi] Goldor Tracer", show = { settings -> settings["RenderHighlight.Wither"] as Boolean }),
+                ColorPickerDef(id = "WitherGoldorTracerColor", name = "[Wi:GT] Color", default = Color(255, 255, 0, 255), show = { settings -> settings["RenderHighlight.WitherGoldorTracer"] as Boolean }),
+                ToggleDef(name = "Mimic Chest"),
+                ColorPickerDef(id = "MimicChestLineColor", name = "[MC] Line Color", default = Color(255, 0, 0, 255), show = { settings -> settings["RenderHighlight.MimicChest"] as Boolean }),
+                ColorPickerDef(id = "MimicChestFillColor", name = "[MC] Fill Color", default = Color(255, 0, 0, 153), show = { settings -> settings["RenderHighlight.MimicChest"] as Boolean }),
+                ToggleDef(name = "Starred Mob"),
+                ToggleDef(id = "StarredMobFill", name = "[SM] Fill", show = { settings -> settings["RenderHighlight.StarredMob"] as Boolean }),
+                ColorPickerDef(id = "StarredMobLineColor", name = "[SM] Line Color", default = Color(0, 255, 0, 255), show = { settings -> settings["RenderHighlight.StarredMob"] as Boolean }),
+                ColorPickerDef(id = "StarredMobFillColor", name = "[SM] Fill Color", default = Color(0, 255, 0, 153), show = { settings -> settings["RenderHighlight.StarredMobFill"] as Boolean }),
+                StepSliderDef(id = "StarredMobScale", name = "[SM] Scale", min = 0, max = 6, step = 1, default = 3, show = { settings -> settings["RenderHighlight.StarredMob"] as Boolean })
+            )
+        ),
         SubcategoryDef(id = "Notification", name = "Notification", category = "-NA Dungeon-"),
         SubcategoryDef(id = "TerminalSolver", name = "Terminal Solver", category = "-NA Dungeon-"),
         SubcategoryDef(id = "TerminalColor", name = "Terminal Color", category = "-NA Dungeon-"),
@@ -257,42 +284,85 @@ object SubCategories {
     val terminalColor get() = FeatureConfig.sharedSections.terminalColor
 }
 
-object NonCategory {
-    private fun enabled(key: String): Boolean = FeatureConfig.sharedSections.nonCategory.elements[key]?.value as Boolean
+private fun ConfigSubcategory.boolean(key: String): Boolean =
+    elements[key]?.value as Boolean
 
-    val commandKeys get() = enabled("NonCategory.CommandKeys")
-    val enabledCooldown get() = enabled("NonCategory.EnableCooldown")
-    val cooldownMessage get() = enabled("NonCategory.CooldownMessage")
-    val efficientDB get() = enabled("NonCategory.EfficientDB")
+private fun ConfigSubcategory.string(key: String): String =
+    elements[key]?.value as String
+
+private fun ConfigSubcategory.int(key: String): Int =
+    elements[key]?.value as Int
+
+private fun ConfigSubcategory.float(key: String): Float =
+    elements[key]?.value as Float
+
+private fun ConfigSubcategory.color(key: String): Color =
+    elements[key]?.value as Color
+
+object NonCategory {
+    private val category get() = FeatureConfig.sharedSections.nonCategory
+
+    val CommandKeys get() = category.boolean("NonCategory.CommandKeys")
+    val EnabledCooldown get() = category.boolean("NonCategory.EnableCooldown")
+    val CooldownMessage get() = category.boolean("NonCategory.CooldownMessage")
+    val EfficientDB get() = category.boolean("NonCategory.EfficientDB")
 }
 
 object DisableUse {
-    private fun enabled(key: String): Boolean = FeatureConfig.sharedSections.disableUse.elements[key]?.value as Boolean
-
-    val secondSoulSand get() = enabled("DisableUse.SecondSoulSand")
-    val placeTuba get() = enabled("DisableUse.PlaceTuba")
-    val placeBOL get() = enabled("DisableUse.PlaceBOL")
-    val placeSceptre get() = enabled("DisableUse.PlaceSceptre")
-    val placeHead get() = enabled("DisableUse.PlaceHead")
-    val sbMenu get() = enabled("DisableUse.SBMenu")
+    private val category get() = FeatureConfig.sharedSections.disableUse
+    
+    val SecondSoulSand get() = category.boolean("DisableUse.SecondSoulSand")
+    val PlaceTuba get() = category.boolean("DisableUse.PlaceTuba")
+    val PlaceBOL get() = category.boolean("DisableUse.PlaceBOL")
+    val PlaceSceptre get() = category.boolean("DisableUse.PlaceSceptre")
+    val PlaceHead get() = category.boolean("DisableUse.PlaceHead")
+    val SBMenu get() = category.boolean("DisableUse.SBMenu")
 }
 
 object ChatHider {
-    private fun enabled(key: String): Boolean = FeatureConfig.sharedSections.chatHider.elements[key]?.value as Boolean
+    private val category get() = FeatureConfig.sharedSections.chatHider
+    
+    val Obtained get() = category.boolean("ChatHider.Obtained")
+    val Milestone get() = category.boolean("ChatHider.Milestone")
+    val KillCombo get() = category.boolean("ChatHider.KillCombo")
+    val Boss get() = category.boolean("ChatHider.Boss")
+    val NPCMort get() = category.boolean("ChatHider.NPCMort")
+    val TeleportCooldown get() = category.boolean("ChatHider.TeleportCooldown")
+    val Implosion get() = category.boolean("ChatHider.Implosion")
+    val TrapRoom get() = category.boolean("ChatHider.TrapRoom")
+    val Lever get() = category.boolean("ChatHider.Lever")
+    val Chest get() = category.boolean("ChatHider.Chest")
+    val IcePath get() = category.boolean("ChatHider.IcePath")
+    val MysticalForce get() = category.boolean("ChatHider.MysticalForce")
+    val LostAdventure get() = category.boolean("ChatHider.LostAdventure")
+    val Essence get() = category.boolean("ChatHider.Essence")
+    val Blessing get() = category.boolean("ChatHider.Blessing")
+}
 
-    val obtained get() = enabled("ChatHider.Obtained")
-    val milestone get() = enabled("ChatHider.Milestone")
-    val killCombo get() = enabled("ChatHider.KillCombo")
-    val boss get() = enabled("ChatHider.Boss")
-    val npcMort get() = enabled("ChatHider.NPCMort")
-    val teleportCooldown get() = enabled("ChatHider.TeleportCooldown")
-    val implosion get() = enabled("ChatHider.Implosion")
-    val trapRoom get() = enabled("ChatHider.TrapRoom")
-    val lever get() = enabled("ChatHider.Lever")
-    val chest get() = enabled("ChatHider.Chest")
-    val icePath get() = enabled("ChatHider.IcePath")
-    val mysticalForce get() = enabled("ChatHider.MysticalForce")
-    val lostAdventure get() = enabled("ChatHider.LostAdventure")
-    val essence get() = enabled("ChatHider.Essence")
-    val blessing get() = enabled("ChatHider.Blessing")
+object RenderHighlight {
+    private val category get() = FeatureConfig.sharedSections.renderHighlight
+
+    val SecretItem get() = category.boolean("RenderHighlight.SecretItem")
+    val SecretItemColor get() = category.color("RenderHighlight.SecretItemColor")
+    val SecretItemScale get() = category.int("RenderHighlight.SecretItemScale")
+    val Bat get() = category.boolean("RenderHighlight.Bat")
+    val BatLineColor get() = category.color("RenderHighlight.BatLineColor")
+    val BatFillColor get() = category.color("RenderHighlight.BatFillColor")
+    val BatTracer get() = category.boolean("RenderHighlight.BatTracer")
+    val BatTracerColor get() = category.color("RenderHighlight.BatTracerColor")
+    val BatScale get() = category.int("RenderHighlight.BatScale")
+    val Wither get() = category.boolean("RenderHighlight.Wither")
+    val WitherLineColor get() = category.color("RenderHighlight.WitherLineColor")
+    val WitherFillColor get() = category.color("RenderHighlight.WitherFillColor")
+    val WitherScale get() = category.int("RenderHighlight.WitherScale")
+    val WitherGoldorTracer get() = category.boolean("RenderHighlight.WitherGoldorTracer")
+    val WitherGoldorTracerColor get() = category.color("RenderHighlight.WitherGoldorTracerColor")
+    val MimicChest get() = category.boolean("RenderHighlight.MimicChest")
+    val MimicChestLineColor get() = category.color("RenderHighlight.MimicChestLineColor")
+    val MimicChestFillColor get() = category.color("RenderHighlight.MimicChestFillColor")
+    val StarredMob get() = category.boolean("RenderHighlight.StarredMob")
+    val StarredMobFill get() = category.boolean("RenderHighlight.StarredMobFill")
+    val StarredMobLineColor get() = category.color("RenderHighlight.StarredMobLineColor")
+    val StarredMobFillColor get() = category.color("RenderHighlight.StarredMobFillColor")
+    val StarredMobScale get() = category.int("RenderHighlight.StarredMobScale")
 }

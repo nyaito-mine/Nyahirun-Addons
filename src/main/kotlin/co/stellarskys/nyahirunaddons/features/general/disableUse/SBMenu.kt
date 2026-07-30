@@ -36,7 +36,7 @@ object SBMenu : Feature("DisableUse") {
         }
 
         on<InteractionEvent.PlaceAttempt> { event ->
-            if (!DisableUse.sbMenu) return@on
+            if (!DisableUse.SBMenu) return@on
 
             if (isCorruptedRelic(event.stack) && (event.isUsingAtBlock(Blocks.CAULDRON) || event.isUsingAtBlock(Blocks.ANVIL))) {
                 relicTickTime = 5
@@ -49,7 +49,7 @@ object SBMenu : Feature("DisableUse") {
         }
 
         on<InteractionEvent.EntityUseAttempt> { event ->
-            if (!DisableUse.sbMenu) return@on
+            if (!DisableUse.SBMenu) return@on
 
             if (isCorruptedRelic(event.stack) && event.entity is ArmorStand) {
                 relicTickTime = 5
@@ -58,7 +58,7 @@ object SBMenu : Feature("DisableUse") {
         }
 
         on<InteractionEvent.PreAttackAttempt> { event ->
-            if (!DisableUse.sbMenu) return@on
+            if (!DisableUse.SBMenu) return@on
 
             if (isBlockedItem(event.stack) || isBlockTime()) {
                 event.cancelWith(true)

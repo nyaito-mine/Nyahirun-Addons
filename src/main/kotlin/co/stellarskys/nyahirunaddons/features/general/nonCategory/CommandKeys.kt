@@ -1,11 +1,12 @@
 package co.stellarskys.nyahirunaddons.features.general.nonCategory
 
-import co.stellarskys.nyahirunaddons.api.GuiUtils
+import co.stellarskys.nyahirunaddons.api.render.screen.GuiUtils
 import co.stellarskys.nyahirunaddons.features.NonCategory
-import co.stellarskys.nyahirunaddons.features.general.nonCategory.commandKeys.Main
+import co.stellarskys.nyahirunaddons.features.general.nonCategory.commandKeys.CommandKeys
 import co.stellarskys.stella.annotations.Module
 import co.stellarskys.stella.api.handlers.Signal.fakeMessage
 import co.stellarskys.stella.api.handlers.Signal.sendCommand
+import co.stellarskys.stella.api.zenith.client
 import co.stellarskys.stella.events.core.KeyEvent
 import co.stellarskys.stella.events.core.TickEvent
 import co.stellarskys.stella.features.Feature
@@ -16,7 +17,7 @@ object CommandKeys : Feature("NonCategory.CommandKeys") {
 
     override fun initialize() {
         on<TickEvent.Client> {
-            if (!NonCategory.enabledCooldown) return@on
+            if (!NonCategory.EnabledCooldown) return@on
             for (entry in cooldownTicks.entries) {
                 if (entry.value > 0) {
                     val value = entry.value - 1
@@ -28,18 +29,18 @@ object CommandKeys : Feature("NonCategory.CommandKeys") {
         }
 
         on<KeyEvent.Press> { event ->
-            if (!NonCategory.commandKeys) return@on
+            if (!NonCategory.CommandKeys || client.screen != null) return@on
             val keyCode = event.keyCode
-            for (entry in Main().commandConfig) {
-                if (keyCode == GuiUtils.keyMap[entry.key]) {
+            for (entry in CommandKeys().commandConfig) {
+                if (keyCode == GuiUtils.keyMap[entry.key] && entry.enabled) {
                     if ((cooldownTicks[entry.id] ?: 0) > 0) {
-                        if (NonCategory.cooldownMessage) fakeMessage("§b[Ny]§r On Cooldown ${cooldownTicks[entry.id]} ticks")
+                        if (NonCategory.CooldownMessage) fakeMessage("§b[Ny]§r On Cooldown ${cooldownTicks[entry.id]} ticks")
                         return@on
                     }
                     val command = entry.command
                     if (command.isEmpty()) return@on
                     sendCommand(command)
-                    if (!NonCategory.enabledCooldown) return@on
+                    if (!NonCategory.EnabledCooldown) return@on
                     cooldownTicks[entry.id] = entry.cooldownTicks
                 }
             }

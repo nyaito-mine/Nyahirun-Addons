@@ -1,4 +1,4 @@
-package co.stellarskys.nyahirunaddons.api
+package co.stellarskys.nyahirunaddons.api.render
 
 import java.awt.Color
 

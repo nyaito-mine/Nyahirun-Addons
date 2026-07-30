@@ -1,17 +1,18 @@
 package co.stellarskys.nyahirunaddons.features.general.nonCategory.commandKeys
 
-import co.stellarskys.nyahirunaddons.api.GuiUtils
-import co.stellarskys.nyahirunaddons.api.MoreRender2D
+import co.stellarskys.nyahirunaddons.api.render.screen.GuiUtils
+import co.stellarskys.nyahirunaddons.api.render.screen.MoreRender2D
 import co.stellarskys.stella.api.config.ui.Palette
 import co.stellarskys.stella.api.config.ui.Palette.withAlpha
 import co.stellarskys.stella.api.handlers.Signal.fakeMessage
 import co.stellarskys.stella.api.horizon.animation.AnimType
+import co.stellarskys.stella.api.zenith.client
 import co.stellarskys.stella.utils.Utils
 import net.minecraft.client.gui.GuiGraphicsExtractor
 import tech.thatgravyboat.skyblockapi.utils.extentions.translated
 import java.util.UUID
 
-class Main : Page() {
+class CommandKeys : Page() {
     fun pageUpdate() {
         commandConfig = ConfigResponse.getCommands()
         if (selectedCommand !in commandConfig) {
@@ -40,7 +41,8 @@ class Main : Page() {
     private var targetOffset = 0f
     private var textInputInteraction = MoreRender2D.TextInputInteraction()
     private var lastSelectedCommandValue = 0
-    private var lastSelectedCommandId: String? = selectedCommand?.id
+    private var lastSelectedCommandId: String? = null
+    private var lastPressedKey: Int? = null
     private var unsavedCommandKeyBind: String? = null
     private var unsavedCommandEnabled: Boolean? = null
 
@@ -79,7 +81,7 @@ class Main : Page() {
         val command = selectedCommand ?: return
 
         val ax = x + (PREVIEW_WIDTH - KEY_WIDTH) / 2
-        val ay = y + 45
+        val ay = y + 55
         val by = ay + 30
 
         val explanationString = listOf("Command", "Cooldown Ticks")
@@ -112,24 +114,16 @@ class Main : Page() {
         ren2d.drawString(context, explanationString[1], ((ax + 2) / explanationScale).toInt(), ((by + 30) / explanationScale).toInt(), explanationScale)
         MoreRender2D.drawTextInput(context, ax, (by + 38), KEY_WIDTH, HEIGHT_SIZE, Palette.Surface0.withAlpha(230), Palette.Blue, Palette.Sapphire.withAlpha(60), command.cooldownTicks.toString(), true, textInputInteraction)
 
-        // Done Button
-        context.translated(ax, by + 80) {
-            ren2d.drawRect(context, 0,0, KEY_WIDTH, HEIGHT_SIZE - 2, Palette.Sapphire.withAlpha(100))
-            ren2d.drawHollowRect(context, 0, 0, KEY_WIDTH, HEIGHT_SIZE - 2, 1, Palette.Blue)
-            val string = "Done"
-            val scale = 1.05f
-            ren2d.drawString(context, string, (((KEY_WIDTH - GuiUtils.getWidth(string) * scale) / 2) / scale).toInt(), (((HEIGHT_SIZE - GuiUtils.getHeight() * scale) / 2) / scale).toInt(), scale)
-        }
     }
 
-    private fun renderCommandConfigGrid(context: GuiGraphicsExtractor, sx: Int, sy: Int, ox: Int, oy: Int, config: List<ConfigResponse.Command>, mouseX: Float, mouseY: Float) {
+    private fun renderCommandConfigGrid(context: GuiGraphicsExtractor, sx: Int, sy: Int, ox: Int, oy: Int, config: List<ConfigResponse.Entry>, mouseX: Float, mouseY: Float) {
         val inScissor = isAreaHovered(ox.toFloat(), oy.toFloat(), 190f, 175f, mouseX, mouseY)
         config.forEachIndexed { i, configs ->
             drawCommandConfig(context, sx, sy + i * STEP_SIZE, ox, oy, configs, mouseX, mouseY, inScissor)
         }
     }
 
-    private fun drawCommandConfig(ctx: GuiGraphicsExtractor, ix: Int, iy: Int, ox: Int, oy: Int, config: ConfigResponse.Command, mouseX: Float, mouseY: Float, inScissor: Boolean) {
+    private fun drawCommandConfig(ctx: GuiGraphicsExtractor, ix: Int, iy: Int, ox: Int, oy: Int, config: ConfigResponse.Entry, mouseX: Float, mouseY: Float, inScissor: Boolean) {
         ren2d.drawRect(ctx, ix, iy, WIDTH_SIZE, HEIGHT_SIZE, Palette.Sapphire.withAlpha(40))
         ren2d.drawHollowRect(ctx, ix, iy, WIDTH_SIZE, HEIGHT_SIZE, 1, if (config == selectedCommand) Palette.Blue else Palette.Sapphire.withAlpha(60))
 
@@ -163,39 +157,61 @@ class Main : Page() {
         val lys = (mouseY - absoluteY - 30 - scrollOffset).toInt()
         val row = Math.floorDiv(lys, STEP_SIZE)
 
+        val ax = 210 + (PREVIEW_WIDTH - KEY_WIDTH) / 2
+        val ay = 110
+
         (lx < (18 + WIDTH_SIZE) && ly in 30 until 205 && lys.mod(STEP_SIZE) <= HEIGHT_SIZE)
             .let { insideSlot -> row.takeIf { insideSlot && it in commandConfig.indices } }
             ?.let {
+                ConfigResponse.updateCommand(
+                    ConfigResponse.Entry(
+                        id = selectedCommand!!.id,
+                        key = unsavedCommandKeyBind ?: selectedCommand!!.key,
+                        command = MoreRender2D.getTextInputValue(ax, 80, KEY_WIDTH, HEIGHT_SIZE),
+                        enabled = unsavedCommandEnabled ?: selectedCommand!!.enabled,
+                        cooldownTicks = (MoreRender2D.getTextInputValue(ax, (ay + 38), KEY_WIDTH, HEIGHT_SIZE)).toInt()
+                    )
+                )
+                unsavedCommandKeyBind = null
+                unsavedCommandEnabled = null
+                pageUpdate()
                 selectedCommand = commandConfig[it]
                 lastSelectedCommandValue = it
                 lastSelectedCommandId = null
-                unsavedCommandKeyBind = null
-                unsavedCommandEnabled = null
                 return true
             }
-
-        val ax = 210 + (PREVIEW_WIDTH - KEY_WIDTH) / 2
-        val ay = 100
 
         val addHovered = lx in 18 until 18 + BUTTON_SIZE && ly >= 212
         val deleteHovered = lx in (18 + BUTTON_SIZE + BUTTON_SPACE) until (18 + BUTTON_SIZE * 2 + BUTTON_SPACE) && ly >= 212
         val keyBindHovered = lx in ax until (ax + PREVIEW_BUTTON_SIZE) && ly in ay until (ay + HEIGHT_SIZE - 2)
         val booleanHovered = lx in (ax + PREVIEW_BUTTON_SIZE + PREVIEW_BUTTON_SPACE) until (ax + PREVIEW_BUTTON_SIZE + PREVIEW_BUTTON_SPACE + PREVIEW_BUTTON_SIZE) && ly in ay until (ay + HEIGHT_SIZE - 2)
-        val doneHovered = lx in ax until (ax + KEY_WIDTH) && ly in (ay + 80) until (ay + 80 + HEIGHT_SIZE - 2)
 
         return when {
             addHovered -> {
+                if (selectedCommand != null) {
+                    ConfigResponse.updateCommand(
+                        ConfigResponse.Entry(
+                            id = selectedCommand!!.id,
+                            key = unsavedCommandKeyBind ?: selectedCommand!!.key,
+                            command = MoreRender2D.getTextInputValue(ax, 80, KEY_WIDTH, HEIGHT_SIZE),
+                            enabled = unsavedCommandEnabled ?: selectedCommand!!.enabled,
+                            cooldownTicks = (MoreRender2D.getTextInputValue(ax, (ay + 38), KEY_WIDTH, HEIGHT_SIZE)).toInt()
+                        )
+                    )
+                }
+                unsavedCommandKeyBind = null
+                unsavedCommandEnabled = null
                 ConfigResponse.addCommand(
-                    ConfigResponse.Command(
+                    ConfigResponse.Entry(
                         id = UUID.randomUUID().toString(),
                         key = "None",
-                        command = "Write Command",
-                        enabled = false,
-                        cooldownTicks = 4
+                        command = "",
+                        enabled = true,
+                        cooldownTicks = 0
                     )
                 )
                 pageUpdate()
-                selectedCommand = commandConfig[commandConfig.lastIndex]
+                selectedCommand = if (commandConfig.lastIndex == -1) commandConfig[0] else commandConfig[commandConfig.lastIndex]
                 lastSelectedCommandValue = commandConfig.lastIndex
                 lastSelectedCommandId = null
                 true
@@ -204,6 +220,8 @@ class Main : Page() {
             deleteHovered -> {
                 if (selectedCommand != null) {
                     ConfigResponse.deleteCommand(selectedCommand!!.id)
+                    unsavedCommandKeyBind = null
+                    unsavedCommandEnabled = null
                     pageUpdate()
                     commandConfig.lastIndex
                     if (commandConfig.lastIndex >= lastSelectedCommandValue) selectedCommand = commandConfig[lastSelectedCommandValue]
@@ -232,23 +250,6 @@ class Main : Page() {
                 true
             }
 
-            doneHovered -> {
-                ConfigResponse.updateCommand(
-                    ConfigResponse.Command(
-                        id = selectedCommand!!.id,
-                        key = unsavedCommandKeyBind ?: selectedCommand!!.key,
-                        command = MoreRender2D.getTextInputValue(ax, 70, KEY_WIDTH, HEIGHT_SIZE),
-                        enabled = unsavedCommandEnabled ?: selectedCommand!!.enabled,
-                        cooldownTicks = (MoreRender2D.getTextInputValue(ax, (ay + 38), KEY_WIDTH, HEIGHT_SIZE)).toInt()
-                    )
-                )
-                unsavedCommandKeyBind = null
-                unsavedCommandEnabled = null
-                pageUpdate()
-                selectedCommand = commandConfig[lastSelectedCommandValue]
-                true
-            }
-
             else -> false
         }
     }
@@ -257,6 +258,7 @@ class Main : Page() {
         textInputInteraction = MoreRender2D.TextInputInteraction(keyCode = keyCode)
         if (focusKeyBind) {
             unsavedCommandKeyBind = GuiUtils.keyMap.entries.firstOrNull { it.value == keyCode }?.key
+            lastPressedKey = keyCode
             focusKeyBind = false
         }
         return super.keyPressed(keyCode, modifiers)
@@ -265,5 +267,33 @@ class Main : Page() {
     override fun charTyped(char: Char): Boolean {
         textInputInteraction = MoreRender2D.TextInputInteraction(typedChar = char)
         return super.charTyped(char)
+    }
+
+    fun screenClose() {
+        if (lastPressedKey == 256) {
+            lastPressedKey = null
+            return
+        }
+        val ax = 210 + (PREVIEW_WIDTH - KEY_WIDTH) / 2
+        val ay = 110
+
+        if (selectedCommand != null) {
+            ConfigResponse.updateCommand(
+                ConfigResponse.Entry(
+                    id = selectedCommand!!.id,
+                    key = unsavedCommandKeyBind ?: selectedCommand!!.key,
+                    command = MoreRender2D.getTextInputValue(ax, 80, KEY_WIDTH, HEIGHT_SIZE),
+                    enabled = unsavedCommandEnabled ?: selectedCommand!!.enabled,
+                    cooldownTicks = (MoreRender2D.getTextInputValue(ax, (ay + 38), KEY_WIDTH, HEIGHT_SIZE)).toInt()
+                )
+            )
+        }
+
+        lastSelectedCommandValue = 0
+        lastSelectedCommandId = null
+        lastPressedKey = null
+        unsavedCommandKeyBind = null
+        unsavedCommandEnabled = null
+        client.setScreen(null)
     }
 }
