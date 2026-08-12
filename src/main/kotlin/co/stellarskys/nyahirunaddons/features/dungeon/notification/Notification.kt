@@ -12,7 +12,6 @@ import co.stellarskys.stella.hud.HUDManager
 import co.stellarskys.stella.utils.render.Render2D
 import net.minecraft.client.gui.GuiGraphicsExtractor
 import net.minecraft.sounds.SoundEvents
-import tech.thatgravyboat.skyblockapi.utils.text.TextProperties.stripped
 
 @Module
 object Notification : Feature("Notification") {
@@ -39,17 +38,10 @@ object Notification : Feature("Notification") {
         on<GuiEvent.RenderHUD> { renderHUD(it.context) }
 
         on<ChatEvent.Receive> { event ->
-            val msg = event.message.stripped
-
             for (entry in notificationConfigs) {
-                val enabled = entry.first
-                val trigger = entry.second
-                val title = entry.third
-
-                if (enabled && msg.contains(trigger)) {
-                    renderTitle = title
+                if (entry.first && event.stripped.contains(entry.second)) {
+                    renderTitle = entry.third
                     renderTicks = 30
-
                     player?.playSound(
                         SoundEvents.EXPERIENCE_ORB_PICKUP,
                         1.0f,
