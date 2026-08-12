@@ -1,299 +1,80 @@
 package co.stellarskys.nyahirunaddons.features.dungeon.notification
 
+import co.stellarskys.stella.annotations.Module
+import co.stellarskys.stella.api.zenith.player
+import co.stellarskys.nyahirunaddons.features.Notification as Noti
+import co.stellarskys.stella.events.core.ChatEvent
 import co.stellarskys.nyahirunaddons.api.render.screen.GuiUtils
-import co.stellarskys.nyahirunaddons.api.render.screen.MoreRender2D
-import co.stellarskys.stella.api.config.ui.Palette
-import co.stellarskys.stella.api.config.ui.Palette.withAlpha
-import co.stellarskys.stella.api.handlers.Signal.fakeMessage
-import co.stellarskys.stella.api.horizon.animation.AnimType
-import co.stellarskys.stella.api.zenith.client
-import co.stellarskys.stella.utils.Utils
+import co.stellarskys.stella.events.core.GuiEvent
+import co.stellarskys.stella.events.core.TickEvent
+import co.stellarskys.stella.features.Feature
+import co.stellarskys.stella.hud.HUDManager
+import co.stellarskys.stella.utils.render.Render2D
 import net.minecraft.client.gui.GuiGraphicsExtractor
-import tech.thatgravyboat.skyblockapi.utils.extentions.translated
-import java.util.UUID
+import net.minecraft.sounds.SoundEvents
+import tech.thatgravyboat.skyblockapi.utils.text.TextProperties.stripped
 
-class Notification : Page() {
-    fun pageUpdate() {
-        commandConfig = ConfigResponse.getCommands()
-        if (selectedCommand !in commandConfig) {
-            selectedCommand = commandConfig.firstOrNull()
-        }
-    }
-    var commandConfig = ConfigResponse.getCommands()
+@Module
+object Notification : Feature("Notification") {
+    var renderTitle: String = ""
+    var renderTicks: Int = 0
 
-    private var scrollOffset by Utils.animate<Float>(0.2, AnimType.EASE_OUT)
+    private val notificationConfigs by lazy { listOf(
+        Triple(Noti.EnragedWish, "⚠ Maxor is enraged! ⚠", "§l§cWish"),
+        Triple(Noti.GateBroke, "The gate has been destroyed!", "§l§cGate Breaked"),
+        Triple(Noti.CoreLeap, "The Core entrance is opening!", "§l§cLeap"),
+        Triple(Noti.NecronLeap, "Goodbye.", "§l§cLeap"),
+        Triple(Noti.Ragnarock, "I no longer wish to fight, but I know that will not stop you.", "§l§cRagnarock"),
+        Triple(Noti.ChestLock, "That chest is locked!", "§l§cLocked"),
+        Triple(Noti.Mask, "Bonzo's Mask saved your life!", "§l§bBonzo's Mask"),
+        Triple(Noti.Mask, "Second Wind Activated! Your Spirit Mask saved your life!", "§l§bSpirit Mask"),
+        Triple(Noti.Mask, "Your Phoenix Pet saved you from certain death!", "§l§bPhoenix"),
+        Triple(Noti.KeyPick, "has obtained Wither Key!", "§l§eWither Key Pick"),
+        Triple(Noti.KeyPick, "has obtained Blood Key!", "§l§eBlood Key Pick")
+    ) }
 
-    companion object {
-        const val WIDTH_SIZE = 172
-        const val HEIGHT_SIZE = 26
-        const val STEP_SIZE = 28
-        const val BUTTON_SIZE = 84
-        const val BUTTON_SPACE = 7
-        const val PREVIEW_WIDTH = 130
-        const val KEY_WIDTH = 116
-        const val PREVIEW_BUTTON_SIZE = 56
-        const val PREVIEW_BUTTON_SPACE = 4
-    }
+    override fun initialize() {
+        HUDManager.register("notification", "This is Notification", "Notification")
 
-    private val totalHeight get() = commandConfig.size * STEP_SIZE + 10
-    private var selectedCommand = commandConfig.firstOrNull()
-    private var focusKeyBind = false
-    private var targetOffset = 0f
-    private var textInputInteraction = MoreRender2D.TextInputInteraction()
-    private var lastSelectedCommandValue = 0
-    private var lastSelectedCommandId: String? = null
-    private var lastPressedKey: Int? = null
-    private var unsavedCommandKeyBind: String? = null
-    private var unsavedCommandEnabled: Boolean? = null
+        on<GuiEvent.RenderHUD> { renderHUD(it.context) }
 
-    override fun onRender(context: GuiGraphicsExtractor, mouseX: Float, mouseY: Float, delta: Float) {
-        // Config
-        ren2d.drawHollowRect(context, 10, 25, 190, 215, 1, Palette.Sky)
-        renderCommandConfig(context, 10, 30, mouseX, mouseY)
-        ren2d.drawScrollbar(context, 193, 30, 175, scrollOffset, totalHeight, Palette.Sky)
-        ren2d.drawRect(context, 10, 208, 190, 1, Palette.Sky)
+        on<ChatEvent.Receive> { event ->
+            val msg = event.message.stripped
 
-        // OverView
-        ren2d.drawHollowRect(context, 210, 25, PREVIEW_WIDTH, 215, 1, Palette.Sky)
-        renderCommandConfigOverview(context, 210, 25, mouseX, mouseY)
+            for (entry in notificationConfigs) {
+                val enabled = entry.first
+                val trigger = entry.second
+                val title = entry.third
 
-        // Add / Delete Button
-        context.translated(18, 212) {
-            ren2d.drawRect(context, 0, 0, BUTTON_SIZE, HEIGHT_SIZE - 2, Palette.Sapphire.withAlpha(100))
-            ren2d.drawHollowRect(context, 0, 0, BUTTON_SIZE, HEIGHT_SIZE - 2, 1, Palette.Blue)
-            ren2d.drawRect(context, 0 + BUTTON_SIZE + BUTTON_SPACE, 0, BUTTON_SIZE, HEIGHT_SIZE - 2, Palette.Sapphire.withAlpha(100))
-            ren2d.drawHollowRect(context, 0 + BUTTON_SIZE + BUTTON_SPACE, 0, BUTTON_SIZE, HEIGHT_SIZE - 2, 1, Palette.Blue)
-            val strings = listOf("Add", "Delete")
-            val scale = 1.05f
-            ren2d.drawString(context, strings[0], (((BUTTON_SIZE - GuiUtils.getWidth(strings[0]) * scale) / 2) / scale).toInt(), (((HEIGHT_SIZE - GuiUtils.getHeight() * scale) / 2) / scale).toInt(), scale)
-            ren2d.drawString(context, strings[1], ((BUTTON_SIZE + BUTTON_SPACE + (BUTTON_SIZE - GuiUtils.getWidth(strings[1]) * scale) / 2) / scale).toInt(), (((HEIGHT_SIZE - GuiUtils.getHeight() * scale) / 2) / scale).toInt(), scale)
-        }
-        textInputInteraction = MoreRender2D.TextInputInteraction()
-    }
+                if (enabled && msg.contains(trigger)) {
+                    renderTitle = title
+                    renderTicks = 30
 
-    private fun renderCommandConfig(context: GuiGraphicsExtractor, x: Int, y: Int, mouseX: Float, mouseY: Float) {
-        ren2d.renderScrolled(context, x, y, 190, 175, scrollOffset) {
-            renderCommandConfigGrid(context, 8, 0, x, y, commandConfig, mouseX, mouseY)
-        }
-    }
-
-    private fun renderCommandConfigOverview(context: GuiGraphicsExtractor, x: Int, y: Int, mouseX: Float, mouseY: Float) {
-        val command = selectedCommand ?: return
-
-        val ax = x + (PREVIEW_WIDTH - KEY_WIDTH) / 2
-        val ay = y + 55
-        val by = ay + 30
-
-        val explanationString = listOf("Command", "Cooldown Ticks")
-        val explanationScale = 0.8f
-
-        if (lastSelectedCommandId != command.id) {
-            MoreRender2D.setTextInputValue(ax, ay, KEY_WIDTH, HEIGHT_SIZE, command.command)
-            MoreRender2D.setTextInputValue(ax, (by + 38), KEY_WIDTH, HEIGHT_SIZE, command.cooldownTicks.toString())
-            lastSelectedCommandId = command.id
-        }
-        // TextInput
-        ren2d.drawString(context, explanationString[0], ((ax + 2) / explanationScale).toInt(), ((ay - 8) / explanationScale).toInt(), explanationScale)
-        MoreRender2D.drawTextInput(context, ax, ay, KEY_WIDTH, HEIGHT_SIZE, Palette.Surface0.withAlpha(230), Palette.Blue, Palette.Sapphire.withAlpha(60), command.command, false, textInputInteraction)
-
-        // KeyBind / Boolean Button
-        context.translated(ax, by) {
-            ren2d.drawRect(context, 0, 0, PREVIEW_BUTTON_SIZE, HEIGHT_SIZE - 2, Palette.Sapphire.withAlpha(100))
-            ren2d.drawHollowRect(context, 0, 0, PREVIEW_BUTTON_SIZE, HEIGHT_SIZE - 2, 1, Palette.Blue)
-            ren2d.drawRect(context, PREVIEW_BUTTON_SIZE + PREVIEW_BUTTON_SPACE, 0, PREVIEW_BUTTON_SIZE, HEIGHT_SIZE - 2, Palette.Sapphire.withAlpha(100))
-            ren2d.drawHollowRect(context, PREVIEW_BUTTON_SIZE + PREVIEW_BUTTON_SPACE, 0, PREVIEW_BUTTON_SIZE, HEIGHT_SIZE - 2, 1, Palette.Blue)
-            val keyBindType = unsavedCommandKeyBind ?: command.key
-            val enabledType = unsavedCommandEnabled ?: command.enabled
-            val strings = listOf(if (focusKeyBind) "_" else keyBindType, if (enabledType) "Enabled" else "Disabled")
-            val scale = 1.05f
-            ren2d.drawString(context, strings[0], (((PREVIEW_BUTTON_SIZE - GuiUtils.getWidth(strings[0]) * scale) / 2) / scale).toInt(), (((HEIGHT_SIZE - GuiUtils.getHeight() * scale) / 2) / scale).toInt(), scale)
-            ren2d.drawString(context, strings[1], ((PREVIEW_BUTTON_SIZE + PREVIEW_BUTTON_SPACE + (PREVIEW_BUTTON_SIZE - GuiUtils.getWidth(strings[1]) * scale) / 2) / scale).toInt(), (((HEIGHT_SIZE - GuiUtils.getHeight() * scale) / 2) / scale).toInt(), scale)
-        }
-
-        // ValueInput
-        ren2d.drawString(context, explanationString[1], ((ax + 2) / explanationScale).toInt(), ((by + 30) / explanationScale).toInt(), explanationScale)
-        MoreRender2D.drawTextInput(context, ax, (by + 38), KEY_WIDTH, HEIGHT_SIZE, Palette.Surface0.withAlpha(230), Palette.Blue, Palette.Sapphire.withAlpha(60), command.cooldownTicks.toString(), true, textInputInteraction)
-
-    }
-
-    private fun renderCommandConfigGrid(context: GuiGraphicsExtractor, sx: Int, sy: Int, ox: Int, oy: Int, config: List<ConfigResponse.Command>, mouseX: Float, mouseY: Float) {
-        val inScissor = isAreaHovered(ox.toFloat(), oy.toFloat(), 190f, 175f, mouseX, mouseY)
-        config.forEachIndexed { i, configs ->
-            drawCommandConfig(context, sx, sy + i * STEP_SIZE, ox, oy, configs, mouseX, mouseY, inScissor)
-        }
-    }
-
-    private fun drawCommandConfig(ctx: GuiGraphicsExtractor, ix: Int, iy: Int, ox: Int, oy: Int, config: ConfigResponse.Command, mouseX: Float, mouseY: Float, inScissor: Boolean) {
-        ren2d.drawRect(ctx, ix, iy, WIDTH_SIZE, HEIGHT_SIZE, Palette.Sapphire.withAlpha(40))
-        ren2d.drawHollowRect(ctx, ix, iy, WIDTH_SIZE, HEIGHT_SIZE, 1, if (config == selectedCommand) Palette.Blue else Palette.Sapphire.withAlpha(60))
-
-        val scale = 1.05f
-        ren2d.drawString(ctx, config.key, ix + 5, ((iy + 9) / scale).toInt(), scale)
-        ren2d.drawString(ctx, config.command, ix + 65, ((iy + 9) / scale).toInt(), scale)
-    }
-
-    override fun mouseScrolled(mouseX: Float, mouseY: Float, amount: Float, horizontalAmount: Float): Boolean {
-        if (isAreaHovered(10f, 25f, 200f, 185f, mouseX, mouseY)) {
-            targetOffset = ren2d.calculateScroll(targetOffset, amount, totalHeight, 175)
-            scrollOffset = targetOffset
-            return true
-        }
-        return super.mouseScrolled(mouseX, mouseY, amount, horizontalAmount)
-    }
-
-    override fun mouseClicked(mouseX: Float, mouseY: Float, button: Int): Boolean {
-        textInputInteraction = MoreRender2D.TextInputInteraction(
-            mouseClickX = (mouseX - absoluteX).toInt(),
-            mouseClickY = (mouseY - absoluteY).toInt(),
-            mouseButton = button
-        )
-        focusKeyBind = false
-
-        if (super.mouseClicked(mouseX, mouseY, button)) return true
-        if (!isAreaHovered(18f, 30f, 337f, 206f, mouseX, mouseY)) return false
-
-        val lx = (mouseX - absoluteX).toInt()
-        val ly = (mouseY - absoluteY).toInt()
-        val lys = (mouseY - absoluteY - 30 - scrollOffset).toInt()
-        val row = Math.floorDiv(lys, STEP_SIZE)
-
-        val ax = 210 + (PREVIEW_WIDTH - KEY_WIDTH) / 2
-        val ay = 110
-
-        (lx < (18 + WIDTH_SIZE) && ly in 30 until 205 && lys.mod(STEP_SIZE) <= HEIGHT_SIZE)
-            .let { insideSlot -> row.takeIf { insideSlot && it in commandConfig.indices } }
-            ?.let {
-                ConfigResponse.updateCommand(
-                    ConfigResponse.Command(
-                        id = selectedCommand!!.id,
-                        key = unsavedCommandKeyBind ?: selectedCommand!!.key,
-                        command = MoreRender2D.getTextInputValue(ax, 80, KEY_WIDTH, HEIGHT_SIZE),
-                        enabled = unsavedCommandEnabled ?: selectedCommand!!.enabled,
-                        cooldownTicks = (MoreRender2D.getTextInputValue(ax, (ay + 38), KEY_WIDTH, HEIGHT_SIZE)).toInt()
-                    )
-                )
-                unsavedCommandKeyBind = null
-                unsavedCommandEnabled = null
-                pageUpdate()
-                selectedCommand = commandConfig[it]
-                lastSelectedCommandValue = it
-                lastSelectedCommandId = null
-                return true
-            }
-
-        val addHovered = lx in 18 until 18 + BUTTON_SIZE && ly >= 212
-        val deleteHovered = lx in (18 + BUTTON_SIZE + BUTTON_SPACE) until (18 + BUTTON_SIZE * 2 + BUTTON_SPACE) && ly >= 212
-        val keyBindHovered = lx in ax until (ax + PREVIEW_BUTTON_SIZE) && ly in ay until (ay + HEIGHT_SIZE - 2)
-        val booleanHovered = lx in (ax + PREVIEW_BUTTON_SIZE + PREVIEW_BUTTON_SPACE) until (ax + PREVIEW_BUTTON_SIZE + PREVIEW_BUTTON_SPACE + PREVIEW_BUTTON_SIZE) && ly in ay until (ay + HEIGHT_SIZE - 2)
-
-        return when {
-            addHovered -> {
-                if (selectedCommand != null) {
-                    ConfigResponse.updateCommand(
-                        ConfigResponse.Command(
-                            id = selectedCommand!!.id,
-                            key = unsavedCommandKeyBind ?: selectedCommand!!.key,
-                            command = MoreRender2D.getTextInputValue(ax, 80, KEY_WIDTH, HEIGHT_SIZE),
-                            enabled = unsavedCommandEnabled ?: selectedCommand!!.enabled,
-                            cooldownTicks = (MoreRender2D.getTextInputValue(ax, (ay + 38), KEY_WIDTH, HEIGHT_SIZE)).toInt()
-                        )
+                    player?.playSound(
+                        SoundEvents.EXPERIENCE_ORB_PICKUP,
+                        1.0f,
+                        0.5f
                     )
                 }
-                unsavedCommandKeyBind = null
-                unsavedCommandEnabled = null
-                ConfigResponse.addCommand(
-                    ConfigResponse.Command(
-                        id = UUID.randomUUID().toString(),
-                        key = "None",
-                        command = "",
-                        enabled = true,
-                        cooldownTicks = 0
-                    )
-                )
-                pageUpdate()
-                selectedCommand = if (commandConfig.lastIndex == -1) commandConfig[0] else commandConfig[commandConfig.lastIndex]
-                lastSelectedCommandValue = commandConfig.lastIndex
-                lastSelectedCommandId = null
-                true
             }
+        }
 
-            deleteHovered -> {
-                if (selectedCommand != null) {
-                    ConfigResponse.deleteCommand(selectedCommand!!.id)
-                    unsavedCommandKeyBind = null
-                    unsavedCommandEnabled = null
-                    pageUpdate()
-                    commandConfig.lastIndex
-                    if (commandConfig.lastIndex >= lastSelectedCommandValue) selectedCommand = commandConfig[lastSelectedCommandValue]
-                    else if (commandConfig.isEmpty()) selectedCommand = null
-                    else {
-                        selectedCommand = commandConfig[lastSelectedCommandValue - 1]
-                        lastSelectedCommandValue -= 1
-                    }
-                    lastSelectedCommandId = null
-                    true
-                } else {
-                    fakeMessage("§b[Ny]§r No command selected to delete")
-                    false
-                }
+        on<TickEvent.Client> {
+            if (renderTicks > 0) {
+                renderTicks--
+            } else {
+                renderTitle = ""
+                renderTicks = 0
             }
-
-            keyBindHovered -> {
-                focusKeyBind = true
-                true
-            }
-
-            booleanHovered -> {
-                var enabled = unsavedCommandEnabled ?: selectedCommand?.enabled ?: return false
-                enabled = !enabled
-                unsavedCommandEnabled = enabled
-                true
-            }
-
-            else -> false
         }
     }
 
-    override fun keyPressed(keyCode: Int, modifiers: Int): Boolean {
-        textInputInteraction = MoreRender2D.TextInputInteraction(keyCode = keyCode)
-        if (focusKeyBind) {
-            unsavedCommandKeyBind = GuiUtils.keyMap.entries.firstOrNull { it.value == keyCode }?.key
-            lastPressedKey = keyCode
-            focusKeyBind = false
-        }
-        return super.keyPressed(keyCode, modifiers)
-    }
-
-    override fun charTyped(char: Char): Boolean {
-        textInputInteraction = MoreRender2D.TextInputInteraction(typedChar = char)
-        return super.charTyped(char)
-    }
-
-    fun screenClose() {
-        if (lastPressedKey == 256) {
-            lastPressedKey = null
-            return
-        }
-        val ax = 210 + (PREVIEW_WIDTH - KEY_WIDTH) / 2
-        val ay = 110
-
-        if (selectedCommand != null) {
-            ConfigResponse.updateCommand(
-                ConfigResponse.Command(
-                    id = selectedCommand!!.id,
-                    key = unsavedCommandKeyBind ?: selectedCommand!!.key,
-                    command = MoreRender2D.getTextInputValue(ax, 80, KEY_WIDTH, HEIGHT_SIZE),
-                    enabled = unsavedCommandEnabled ?: selectedCommand!!.enabled,
-                    cooldownTicks = (MoreRender2D.getTextInputValue(ax, (ay + 38), KEY_WIDTH, HEIGHT_SIZE)).toInt()
-                )
-            )
-        }
-
-        lastSelectedCommandValue = 0
-        lastSelectedCommandId = null
-        lastPressedKey = null
-        unsavedCommandKeyBind = null
-        unsavedCommandEnabled = null
-        client.setScreen(null)
+    private fun renderHUD(context: GuiGraphicsExtractor) = HUDManager.renderHud("notification", context) {
+        val contentWidth = GuiUtils.getWidth("This is Notification")
+        val contentHeight = GuiUtils.getHeight()
+        val scale = 1.1f
+        val x = (((contentWidth - GuiUtils.getWidth(renderTitle) * scale) / 2) / scale).toInt()
+        val y = (((contentHeight - GuiUtils.getHeight() * scale) / 2) / scale).toInt() + 1 //なぜか1pxずらすと見た目がよくなる
+        Render2D.drawString(context, renderTitle, x, y, scale, true)
     }
 }

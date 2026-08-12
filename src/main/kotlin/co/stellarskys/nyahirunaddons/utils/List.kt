@@ -24,3 +24,18 @@ data class ListEntryStringColorInt(
     val string: String,
     val color: Int = 0xFF404040.toInt()
 )
+
+data class Quadruple(
+    val first: Any,
+    val second: Any,
+    val third: Any,
+    val fourth: Any
+)
+
+data class Quintuple(
+    val first: Any,
+    val second: Any,
+    val third: Any,
+    val fourth: Any,
+    val fifth: Any
+)

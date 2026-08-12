@@ -1,4 +1,4 @@
-package co.stellarskys.nyahirunaddons.features.dungeon.notification
+package co.stellarskys.nyahirunaddons.config.gui
 
 import co.stellarskys.stella.api.config.ui.Palette
 import co.stellarskys.stella.api.config.ui.Palette.withAlpha
@@ -6,7 +6,9 @@ import co.stellarskys.stella.api.horizon.mc.ParentElement
 import net.minecraft.client.gui.GuiGraphicsExtractor
 import tech.thatgravyboat.skyblockapi.platform.pushPop
 
-open class Page : ParentElement() {
+open class Page(
+    val title: String,
+) : ParentElement() {
     init {
         width = 350f
         height = 250f
@@ -26,8 +28,10 @@ open class Page : ParentElement() {
             context.pose().translate(x, y)
             ren2d.drawRect(context, 0, 0, width.toInt(), height.toInt(), Palette.Crust.withAlpha(150))
             ren2d.drawHollowRect(context, 0, 0, width.toInt(), height.toInt(), 1, Palette.Sky)
-            ren2d.drawString(context, "Notification", 10, 10)
+            ren2d.drawString(context, title, 10, 10)
             onRender(context, mouseX, mouseY, delta)
         }
     }
+
+    open fun screenClose() {}
 }

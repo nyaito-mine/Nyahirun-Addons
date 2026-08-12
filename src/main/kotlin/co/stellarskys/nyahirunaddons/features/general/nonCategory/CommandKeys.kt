@@ -1,8 +1,8 @@
 package co.stellarskys.nyahirunaddons.features.general.nonCategory
 
 import co.stellarskys.nyahirunaddons.api.render.screen.GuiUtils
+import co.stellarskys.nyahirunaddons.config.gui.pages.CommandKeys
 import co.stellarskys.nyahirunaddons.features.NonCategory
-import co.stellarskys.nyahirunaddons.features.general.nonCategory.commandKeys.CommandKeys
 import co.stellarskys.stella.annotations.Module
 import co.stellarskys.stella.api.handlers.Signal.fakeMessage
 import co.stellarskys.stella.api.handlers.Signal.sendCommand

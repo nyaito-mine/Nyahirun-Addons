@@ -1,5 +1,6 @@
 package co.stellarskys.nyahirunaddons.features
 
+import co.stellarskys.nyahirunaddons.config.gui.Screen
 import co.stellarskys.stella.api.config.core.Config
 import co.stellarskys.stella.api.config.core.ConfigSubcategory
 import java.awt.Color
@@ -9,6 +10,7 @@ object FeatureConfig {
     internal lateinit var addonSections: Sections
 
     data class Sections(
+        val stellaNavExtra: ConfigSubcategory,
         val nonCategory: ConfigSubcategory,
         val disableUse: ConfigSubcategory,
         val chatHider: ConfigSubcategory,
@@ -21,73 +23,92 @@ object FeatureConfig {
     )
 
     private val subcategories = listOf(
-        SubcategoryDef(
-            name = "NonCategory", category = "-NA General-", features = listOf(
-                ToggleDef(name = "CommandKeys"),
-                ToggleDef(id = "EnableCooldown", name = "[CK] EnableCD", default = true, show = { settings -> settings["NonCategory.CommandKeys"] as Boolean }),
-                ToggleDef(id = "CooldownMessage", name = "[CK] CDMessage", default = false, show = { settings -> settings["NonCategory.CommandKeys"] as Boolean }),
-                ToggleDef(name = "EfficientDB")
+        // StellaNav
+        SubcategoryDef(name = "Extra", category = "StellaNav", features = listOf(
+            ToggleDef(id = "DoorsFill", name = "-NA- Doors Fill"),
+            ColorPickerDef(id = "DoorsFillKeyColor", name = "-NA- Fill Key Color", default = Color(0, 255, 0, 153), show = { settings -> settings["Extra.DoorsFill"] as Boolean }),
+            ColorPickerDef(id = "DoorsFillNoKeyColor", name = "-NA- Fill No Key Color", default = Color(255, 0, 0, 153), show = { settings -> settings["Extra.DoorsFill"] as Boolean }),
+            ToggleDef(id = "DoorsTracer", name = "-NA- Doors Tracer"),
+            ColorPickerDef(id = "DoorsTracerKeyColor", name = "-NA- Tracer Key Color", default = Color(0, 255, 0, 255), show = { settings -> settings["Extra.DoorsTracer"] as Boolean }),
+            ColorPickerDef(id = "DoorsTracerNoKeyColor", name = "-NA- Tracer No Key Color", default = Color(255, 0, 0, 255), show = { settings -> settings["Extra.DoorsTracer"] as Boolean })
             )
         ),
-        SubcategoryDef(
-            id = "DisableUse", name = "Disable Use", category = "-NA General-", features = listOf(
-                ToggleDef(name = "Second SoulSand"),
-                ToggleDef(name = "Place Tuba"),
-                ToggleDef(name = "Place BOL"),
-                ToggleDef(name = "Place Sceptre"),
-                ToggleDef(name = "Place Head"),
-                ToggleDef(name = "SBMenu")
+        //General
+        SubcategoryDef(name = "NonCategory", category = "-NA General-", features = listOf(
+            ToggleDef(name = "CommandKeys"),
+            ToggleDef(id = "EnableCooldown", name = "[CK] EnableCD", default = true, show = { settings -> settings["NonCategory.CommandKeys"] as Boolean }),
+            ToggleDef(id = "CooldownMessage", name = "[CK] CDMessage", show = { settings -> settings["NonCategory.CommandKeys"] as Boolean }),
+            ToggleDef(name = "EfficientDB")
             )
         ),
-        SubcategoryDef(
-            id = "ChatHider", name = "Chat Hider", category = "-NA General-", features = listOf(
-                ToggleDef(name = "Obtained"),
-                ToggleDef(name = "Milestone"),
-                ToggleDef(name = "KillCombo"),
-                ToggleDef(name = "Boss"),
-                ToggleDef(name = "NPCMort"),
-                ToggleDef(name = "TeleportCooldown"),
-                ToggleDef(name = "Implosion"),
-                ToggleDef(name = "TrapRoom"),
-                ToggleDef(name = "Lever"),
-                ToggleDef(name = "Chest"),
-                ToggleDef(name = "IcePath"),
-                ToggleDef(name = "MysticalForce"),
-                ToggleDef(name = "LostAdventure"),
-                ToggleDef(name = "Essence"),
-                ToggleDef(name = "Blessing")
+        SubcategoryDef(id = "DisableUse", name = "Disable Use", category = "-NA General-", features = listOf(
+            ToggleDef(name = "Second SoulSand"),
+            ToggleDef(name = "Place Tuba"),
+            ToggleDef(name = "Place BOL"),
+            ToggleDef(name = "Place Sceptre"),
+            ToggleDef(name = "Place Head"),
+            ToggleDef(name = "SBMenu")
             )
         ),
+        SubcategoryDef(id = "ChatHider", name = "Chat Hider", category = "-NA General-", features = listOf(
+            ToggleDef(name = "Obtained"),
+            ToggleDef(name = "Milestone"),
+            ToggleDef(name = "KillCombo"),
+            ToggleDef(name = "Boss"),
+            ToggleDef(name = "NPCMort"),
+            ToggleDef(name = "TeleportCooldown"),
+            ToggleDef(name = "Implosion"),
+            ToggleDef(name = "TrapRoom"),
+            ToggleDef(name = "Lever"),
+            ToggleDef(name = "Chest"),
+            ToggleDef(name = "IcePath"),
+            ToggleDef(name = "MysticalForce"),
+            ToggleDef(name = "LostAdventure"),
+            ToggleDef(name = "Essence"),
+            ToggleDef(name = "Blessing")
+            )
+        ),
+        //Dungeon
         SubcategoryDef(id = "PartyFinder", name = "Party Finder", category = "-NA Dungeon-"),
         SubcategoryDef(id = "AutoRefill", name = "Auto Refill", category = "-NA Dungeon-"),
-        SubcategoryDef(
-            id = "RenderHighlight", name = "Render Highlight", category = "-NA Dungeon-", features = listOf(
-                ToggleDef(name = "Secret Item"),
-                ColorPickerDef(id = "SecretItemColor", name = "[SI] Color", default = Color(0, 255, 0, 255), show = { settings -> settings["RenderHighlight.SecretItem"] as Boolean }),
-                StepSliderDef(id = "SecretItemScale", name = "[SI] Scale", min = 0, max = 6, step = 1, default = 2, show = { settings -> settings["RenderHighlight.SecretItem"] as Boolean }),
-                ToggleDef(name = "Bat"),
-                ColorPickerDef(id = "BatLineColor", name = "[Ba] Line Color", default = Color(255, 0, 255, 255), show = { settings -> settings["RenderHighlight.Bat"] as Boolean }),
-                ColorPickerDef(id = "BatFillColor", name = "[Ba] Fill Color", default = Color(255, 0, 255, 153), show = { settings -> settings["RenderHighlight.Bat"] as Boolean }),
-                ToggleDef(id = "BatTracer", name = "[Ba] Tracer", show = { settings -> settings["RenderHighlight.Bat"] as Boolean }),
-                ColorPickerDef(id = "BatTracerColor", name = "[Ba:T] Color", default = Color(255, 0, 255, 255), show = { settings -> settings["RenderHighlight.BatTracer"] as Boolean }),
-                StepSliderDef(id = "BatScale", name = "[Ba] Scale", min = 0, max = 6, step = 1, default = 0, show = { settings -> settings["RenderHighlight.Bat"] as Boolean }),
-                ToggleDef(name = "Wither"),
-                ColorPickerDef(id = "WitherLineColor", name = "[Wi] Line Color", default = Color(0, 255, 255, 255), show = { settings -> settings["RenderHighlight.Wither"] as Boolean }),
-                ColorPickerDef(id = "WitherFillColor", name = "[Wi] Fill Color", default = Color(0, 255, 255, 153), show = { settings -> settings["RenderHighlight.Wither"] as Boolean }),
-                StepSliderDef(id = "WitherScale", name = "[Wi] Scale", min = 0, max = 6, step = 1, default = 0, show = { settings -> settings["RenderHighlight.Wither"] as Boolean }),
-                ToggleDef(id = "WitherGoldorTracer", name = "[Wi] Goldor Tracer", show = { settings -> settings["RenderHighlight.Wither"] as Boolean }),
-                ColorPickerDef(id = "WitherGoldorTracerColor", name = "[Wi:GT] Color", default = Color(255, 255, 0, 255), show = { settings -> settings["RenderHighlight.WitherGoldorTracer"] as Boolean }),
-                ToggleDef(name = "Mimic Chest"),
-                ColorPickerDef(id = "MimicChestLineColor", name = "[MC] Line Color", default = Color(255, 0, 0, 255), show = { settings -> settings["RenderHighlight.MimicChest"] as Boolean }),
-                ColorPickerDef(id = "MimicChestFillColor", name = "[MC] Fill Color", default = Color(255, 0, 0, 153), show = { settings -> settings["RenderHighlight.MimicChest"] as Boolean }),
-                ToggleDef(name = "Starred Mob"),
-                ToggleDef(id = "StarredMobFill", name = "[SM] Fill", show = { settings -> settings["RenderHighlight.StarredMob"] as Boolean }),
-                ColorPickerDef(id = "StarredMobLineColor", name = "[SM] Line Color", default = Color(0, 255, 0, 255), show = { settings -> settings["RenderHighlight.StarredMob"] as Boolean }),
-                ColorPickerDef(id = "StarredMobFillColor", name = "[SM] Fill Color", default = Color(0, 255, 0, 153), show = { settings -> settings["RenderHighlight.StarredMobFill"] as Boolean }),
-                StepSliderDef(id = "StarredMobScale", name = "[SM] Scale", min = 0, max = 6, step = 1, default = 3, show = { settings -> settings["RenderHighlight.StarredMob"] as Boolean })
+        SubcategoryDef(id = "RenderHighlight", name = "Render Highlight", category = "-NA Dungeon-", features = listOf(
+            ToggleDef(name = "Secret Item"),
+            ColorPickerDef(id = "SecretItemColor", name = "[SI] Color", default = Color(0, 255, 0, 255), show = { settings -> settings["RenderHighlight.SecretItem"] as Boolean }),
+            StepSliderDef(id = "SecretItemScale", name = "[SI] Scale", min = 0, max = 6, step = 1, default = 2, show = { settings -> settings["RenderHighlight.SecretItem"] as Boolean }),
+            ToggleDef(name = "Bat"),
+            ColorPickerDef(id = "BatLineColor", name = "[Ba] Line Color", default = Color(255, 0, 255, 255), show = { settings -> settings["RenderHighlight.Bat"] as Boolean }),
+            ColorPickerDef(id = "BatFillColor", name = "[Ba] Fill Color", default = Color(255, 0, 255, 153), show = { settings -> settings["RenderHighlight.Bat"] as Boolean }),
+            ToggleDef(id = "BatTracer", name = "[Ba] Tracer", show = { settings -> settings["RenderHighlight.Bat"] as Boolean }),
+            ColorPickerDef(id = "BatTracerColor", name = "[Ba:T] Color", default = Color(255, 0, 255, 255), show = { settings -> settings["RenderHighlight.BatTracer"] as Boolean }),
+            StepSliderDef(id = "BatScale", name = "[Ba] Scale", min = 0, max = 6, step = 1, default = 0, show = { settings -> settings["RenderHighlight.Bat"] as Boolean }),
+            ToggleDef(name = "Wither"),
+            ColorPickerDef(id = "WitherLineColor", name = "[Wi] Line Color", default = Color(0, 255, 255, 255), show = { settings -> settings["RenderHighlight.Wither"] as Boolean }),
+            ColorPickerDef(id = "WitherFillColor", name = "[Wi] Fill Color", default = Color(0, 255, 255, 153), show = { settings -> settings["RenderHighlight.Wither"] as Boolean }),
+            StepSliderDef(id = "WitherScale", name = "[Wi] Scale", min = 0, max = 6, step = 1, default = 0, show = { settings -> settings["RenderHighlight.Wither"] as Boolean }),
+            ToggleDef(id = "WitherGoldorTracer", name = "[Wi] Goldor Tracer", show = { settings -> settings["RenderHighlight.Wither"] as Boolean }),
+            ColorPickerDef(id = "WitherGoldorTracerColor", name = "[Wi:GT] Color", default = Color(255, 255, 0, 255), show = { settings -> settings["RenderHighlight.WitherGoldorTracer"] as Boolean }),
+            ToggleDef(name = "Mimic Chest"),
+            ColorPickerDef(id = "MimicChestLineColor", name = "[MC] Line Color", default = Color(255, 0, 0, 255), show = { settings -> settings["RenderHighlight.MimicChest"] as Boolean }),
+            ColorPickerDef(id = "MimicChestFillColor", name = "[MC] Fill Color", default = Color(255, 0, 0, 153), show = { settings -> settings["RenderHighlight.MimicChest"] as Boolean }),
+            ToggleDef(name = "Starred Mob"),
+            ToggleDef(id = "StarredMobFill", name = "[SM] Fill", show = { settings -> settings["RenderHighlight.StarredMob"] as Boolean }),
+            ColorPickerDef(id = "StarredMobLineColor", name = "[SM] Line Color", default = Color(0, 255, 0, 255), show = { settings -> settings["RenderHighlight.StarredMob"] as Boolean }),
+            ColorPickerDef(id = "StarredMobFillColor", name = "[SM] Fill Color", default = Color(0, 255, 0, 153), show = { settings -> settings["RenderHighlight.StarredMobFill"] as Boolean }),
+            StepSliderDef(id = "StarredMobScale", name = "[SM] Scale", min = 0, max = 6, step = 1, default = 3, show = { settings -> settings["RenderHighlight.StarredMob"] as Boolean })
             )
         ),
-        SubcategoryDef(id = "Notification", name = "Notification", category = "-NA Dungeon-"),
+        SubcategoryDef(id = "Notification", name = "Notification", category = "-NA Dungeon-", features = listOf(
+            ButtonDef(name = "Custom", onClick = { Screen.open("Notification") }),
+            ToggleDef(name = "Enraged Wish"),
+            ToggleDef(name = "Gate Broke"),
+            ToggleDef(name = "Core Leap"),
+            ToggleDef(name = "Necron Leap"),
+            ToggleDef(name = "Ragnarock"),
+            ToggleDef(name = "Chest Lock"),
+            ToggleDef(name = "Mask"),
+            ToggleDef(name = "Key Pick")
+            )
+        ),
         SubcategoryDef(id = "TerminalSolver", name = "Terminal Solver", category = "-NA Dungeon-"),
         SubcategoryDef(id = "TerminalColor", name = "Terminal Color", category = "-NA Dungeon-"),
     )
@@ -106,6 +127,7 @@ object FeatureConfig {
         }
 
         return Sections(
+            stellaNavExtra = created.getValue("Extra"),
             nonCategory = created.getValue("NonCategory"),
             disableUse = created.getValue("Disable Use"),
             chatHider = created.getValue("Chat Hider"),
@@ -273,6 +295,7 @@ object FeatureConfig {
 }
 
 object SubCategories {
+    val stellaNav get() = FeatureConfig.sharedSections.stellaNavExtra
     val nonCategory get() = FeatureConfig.sharedSections.nonCategory
     val disableUse get() = FeatureConfig.sharedSections.disableUse
     val chatHider get() = FeatureConfig.sharedSections.chatHider
@@ -299,6 +322,17 @@ private fun ConfigSubcategory.float(key: String): Float =
 private fun ConfigSubcategory.color(key: String): Color =
     elements[key]?.value as Color
 
+object StellaNavExtra {
+    private val category get() = FeatureConfig.sharedSections.stellaNavExtra
+
+    val DoorsFill get() = category.boolean("Extra.DoorsFill")
+    val DoorsFillKeyColor get() = category.color("Extra.DoorsFillKeyColor")
+    val DoorsFillNoKeyColor get() = category.color("Extra.DoorsFillNoKeyColor")
+    val DoorsTracer get() = category.boolean("Extra.DoorsTracer")
+    val DoorsTracerKeyColor get() = category.color("Extra.DoorsTracerKeyColor")
+    val DoorsTracerNoKeyColor get() = category.color("Extra.DoorsTracerNoKeyColor")
+}
+
 object NonCategory {
     private val category get() = FeatureConfig.sharedSections.nonCategory
 
@@ -310,7 +344,7 @@ object NonCategory {
 
 object DisableUse {
     private val category get() = FeatureConfig.sharedSections.disableUse
-    
+
     val SecondSoulSand get() = category.boolean("DisableUse.SecondSoulSand")
     val PlaceTuba get() = category.boolean("DisableUse.PlaceTuba")
     val PlaceBOL get() = category.boolean("DisableUse.PlaceBOL")
@@ -321,7 +355,7 @@ object DisableUse {
 
 object ChatHider {
     private val category get() = FeatureConfig.sharedSections.chatHider
-    
+
     val Obtained get() = category.boolean("ChatHider.Obtained")
     val Milestone get() = category.boolean("ChatHider.Milestone")
     val KillCombo get() = category.boolean("ChatHider.KillCombo")
@@ -365,4 +399,17 @@ object RenderHighlight {
     val StarredMobLineColor get() = category.color("RenderHighlight.StarredMobLineColor")
     val StarredMobFillColor get() = category.color("RenderHighlight.StarredMobFillColor")
     val StarredMobScale get() = category.int("RenderHighlight.StarredMobScale")
+}
+
+object Notification {
+    private val category get() = FeatureConfig.sharedSections.notification
+
+    val EnragedWish get() = category.boolean("Notification.EnragedWish")
+    val GateBroke get() = category.boolean("Notification.GateBroke")
+    val CoreLeap get() = category.boolean("Notification.CoreLeap")
+    val NecronLeap get() = category.boolean("Notification.NecronLeap")
+    val Ragnarock get() = category.boolean("Notification.Ragnarock")
+    val ChestLock get() = category.boolean("Notification.ChestLock")
+    val Mask get() = category.boolean("Notification.Mask")
+    val KeyPick get() = category.boolean("Notification.KeyPick")
 }

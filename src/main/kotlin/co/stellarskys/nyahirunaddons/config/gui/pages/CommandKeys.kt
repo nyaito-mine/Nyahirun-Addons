@@ -1,7 +1,9 @@
-package co.stellarskys.nyahirunaddons.features.general.nonCategory.commandKeys
+package co.stellarskys.nyahirunaddons.config.gui.pages
 
 import co.stellarskys.nyahirunaddons.api.render.screen.GuiUtils
 import co.stellarskys.nyahirunaddons.api.render.screen.MoreRender2D
+import co.stellarskys.nyahirunaddons.config.gui.Page
+import co.stellarskys.nyahirunaddons.config.gui.response.CommandKeysResponse
 import co.stellarskys.stella.api.config.ui.Palette
 import co.stellarskys.stella.api.config.ui.Palette.withAlpha
 import co.stellarskys.stella.api.handlers.Signal.fakeMessage
@@ -11,15 +13,16 @@ import co.stellarskys.stella.utils.Utils
 import net.minecraft.client.gui.GuiGraphicsExtractor
 import tech.thatgravyboat.skyblockapi.utils.extentions.translated
 import java.util.UUID
+import kotlin.collections.contains
 
-class CommandKeys : Page() {
+class CommandKeys : Page("CommandKeys") {
     fun pageUpdate() {
-        commandConfig = ConfigResponse.getCommands()
+        commandConfig = CommandKeysResponse.getCommands()
         if (selectedCommand !in commandConfig) {
             selectedCommand = commandConfig.firstOrNull()
         }
     }
-    var commandConfig = ConfigResponse.getCommands()
+    var commandConfig = CommandKeysResponse.getCommands()
 
     private var scrollOffset by Utils.animate<Float>(0.2, AnimType.EASE_OUT)
 
@@ -94,7 +97,7 @@ class CommandKeys : Page() {
         }
         // TextInput
         ren2d.drawString(context, explanationString[0], ((ax + 2) / explanationScale).toInt(), ((ay - 8) / explanationScale).toInt(), explanationScale)
-        MoreRender2D.drawTextInput(context, ax, ay, KEY_WIDTH, HEIGHT_SIZE, Palette.Surface0.withAlpha(230), Palette.Blue, Palette.Sapphire.withAlpha(60), command.command, false, textInputInteraction)
+        MoreRender2D.drawTextInput(context, ax, ay, KEY_WIDTH, HEIGHT_SIZE, Palette.Surface0.withAlpha(230), Palette.Blue, Palette.Sapphire.withAlpha(60), command.command, textInputInteraction)
 
         // KeyBind / Boolean Button
         context.translated(ax, by) {
@@ -112,24 +115,30 @@ class CommandKeys : Page() {
 
         // ValueInput
         ren2d.drawString(context, explanationString[1], ((ax + 2) / explanationScale).toInt(), ((by + 30) / explanationScale).toInt(), explanationScale)
-        MoreRender2D.drawTextInput(context, ax, (by + 38), KEY_WIDTH, HEIGHT_SIZE, Palette.Surface0.withAlpha(230), Palette.Blue, Palette.Sapphire.withAlpha(60), command.cooldownTicks.toString(), true, textInputInteraction)
+        MoreRender2D.drawTextInput(context, ax, (by + 38), KEY_WIDTH, HEIGHT_SIZE, Palette.Surface0.withAlpha(230), Palette.Blue, Palette.Sapphire.withAlpha(60), command.cooldownTicks.toString(), textInputInteraction, "Int")
 
     }
 
-    private fun renderCommandConfigGrid(context: GuiGraphicsExtractor, sx: Int, sy: Int, ox: Int, oy: Int, config: List<ConfigResponse.Entry>, mouseX: Float, mouseY: Float) {
+    private fun renderCommandConfigGrid(context: GuiGraphicsExtractor, sx: Int, sy: Int, ox: Int, oy: Int, config: List<CommandKeysResponse.Entry>, mouseX: Float, mouseY: Float) {
         val inScissor = isAreaHovered(ox.toFloat(), oy.toFloat(), 190f, 175f, mouseX, mouseY)
         config.forEachIndexed { i, configs ->
             drawCommandConfig(context, sx, sy + i * STEP_SIZE, ox, oy, configs, mouseX, mouseY, inScissor)
         }
     }
 
-    private fun drawCommandConfig(ctx: GuiGraphicsExtractor, ix: Int, iy: Int, ox: Int, oy: Int, config: ConfigResponse.Entry, mouseX: Float, mouseY: Float, inScissor: Boolean) {
+    private fun drawCommandConfig(ctx: GuiGraphicsExtractor, ix: Int, iy: Int, ox: Int, oy: Int, config: CommandKeysResponse.Entry, mouseX: Float, mouseY: Float, inScissor: Boolean) {
         ren2d.drawRect(ctx, ix, iy, WIDTH_SIZE, HEIGHT_SIZE, Palette.Sapphire.withAlpha(40))
         ren2d.drawHollowRect(ctx, ix, iy, WIDTH_SIZE, HEIGHT_SIZE, 1, if (config == selectedCommand) Palette.Blue else Palette.Sapphire.withAlpha(60))
 
         val scale = 1.05f
         ren2d.drawString(ctx, config.key, ix + 5, ((iy + 9) / scale).toInt(), scale)
-        ren2d.drawString(ctx, config.command, ix + 65, ((iy + 9) / scale).toInt(), scale)
+
+        val displayText = if (config.command.length > 15) {
+            config.command.take(15) + "..."
+        } else {
+            config.command
+        }
+        ren2d.drawString(ctx, displayText, ix + 65, ((iy + 9) / scale).toInt(), scale)
     }
 
     override fun mouseScrolled(mouseX: Float, mouseY: Float, amount: Float, horizontalAmount: Float): Boolean {
@@ -163,13 +172,13 @@ class CommandKeys : Page() {
         (lx < (18 + WIDTH_SIZE) && ly in 30 until 205 && lys.mod(STEP_SIZE) <= HEIGHT_SIZE)
             .let { insideSlot -> row.takeIf { insideSlot && it in commandConfig.indices } }
             ?.let {
-                ConfigResponse.updateCommand(
-                    ConfigResponse.Entry(
+                CommandKeysResponse.updateCommand(
+                    CommandKeysResponse.Entry(
                         id = selectedCommand!!.id,
                         key = unsavedCommandKeyBind ?: selectedCommand!!.key,
                         command = MoreRender2D.getTextInputValue(ax, 80, KEY_WIDTH, HEIGHT_SIZE),
                         enabled = unsavedCommandEnabled ?: selectedCommand!!.enabled,
-                        cooldownTicks = (MoreRender2D.getTextInputValue(ax, (ay + 38), KEY_WIDTH, HEIGHT_SIZE)).toInt()
+                        cooldownTicks = if (MoreRender2D.getTextInputValue(ax, (ay + 38), KEY_WIDTH, HEIGHT_SIZE) == "") 0 else (MoreRender2D.getTextInputValue(ax, (ay + 38), KEY_WIDTH, HEIGHT_SIZE)).toInt()
                     )
                 )
                 unsavedCommandKeyBind = null
@@ -189,20 +198,20 @@ class CommandKeys : Page() {
         return when {
             addHovered -> {
                 if (selectedCommand != null) {
-                    ConfigResponse.updateCommand(
-                        ConfigResponse.Entry(
+                    CommandKeysResponse.updateCommand(
+                        CommandKeysResponse.Entry(
                             id = selectedCommand!!.id,
                             key = unsavedCommandKeyBind ?: selectedCommand!!.key,
                             command = MoreRender2D.getTextInputValue(ax, 80, KEY_WIDTH, HEIGHT_SIZE),
                             enabled = unsavedCommandEnabled ?: selectedCommand!!.enabled,
-                            cooldownTicks = (MoreRender2D.getTextInputValue(ax, (ay + 38), KEY_WIDTH, HEIGHT_SIZE)).toInt()
+                            cooldownTicks = if (MoreRender2D.getTextInputValue(ax, (ay + 38), KEY_WIDTH, HEIGHT_SIZE) == "") 0 else (MoreRender2D.getTextInputValue(ax, (ay + 38), KEY_WIDTH, HEIGHT_SIZE)).toInt()
                         )
                     )
                 }
                 unsavedCommandKeyBind = null
                 unsavedCommandEnabled = null
-                ConfigResponse.addCommand(
-                    ConfigResponse.Entry(
+                CommandKeysResponse.addCommand(
+                    CommandKeysResponse.Entry(
                         id = UUID.randomUUID().toString(),
                         key = "None",
                         command = "",
@@ -219,7 +228,7 @@ class CommandKeys : Page() {
 
             deleteHovered -> {
                 if (selectedCommand != null) {
-                    ConfigResponse.deleteCommand(selectedCommand!!.id)
+                    CommandKeysResponse.deleteCommand(selectedCommand!!.id)
                     unsavedCommandKeyBind = null
                     unsavedCommandEnabled = null
                     pageUpdate()
@@ -255,7 +264,7 @@ class CommandKeys : Page() {
     }
 
     override fun keyPressed(keyCode: Int, modifiers: Int): Boolean {
-        textInputInteraction = MoreRender2D.TextInputInteraction(keyCode = keyCode)
+        textInputInteraction = MoreRender2D.TextInputInteraction(keyCode = keyCode, modifiers = modifiers)
         if (focusKeyBind) {
             unsavedCommandKeyBind = GuiUtils.keyMap.entries.firstOrNull { it.value == keyCode }?.key
             lastPressedKey = keyCode
@@ -269,7 +278,7 @@ class CommandKeys : Page() {
         return super.charTyped(char)
     }
 
-    fun screenClose() {
+    override fun screenClose() {
         if (lastPressedKey == 256) {
             lastPressedKey = null
             return
@@ -278,13 +287,13 @@ class CommandKeys : Page() {
         val ay = 110
 
         if (selectedCommand != null) {
-            ConfigResponse.updateCommand(
-                ConfigResponse.Entry(
+            CommandKeysResponse.updateCommand(
+                CommandKeysResponse.Entry(
                     id = selectedCommand!!.id,
                     key = unsavedCommandKeyBind ?: selectedCommand!!.key,
                     command = MoreRender2D.getTextInputValue(ax, 80, KEY_WIDTH, HEIGHT_SIZE),
                     enabled = unsavedCommandEnabled ?: selectedCommand!!.enabled,
-                    cooldownTicks = (MoreRender2D.getTextInputValue(ax, (ay + 38), KEY_WIDTH, HEIGHT_SIZE)).toInt()
+                    cooldownTicks = if (MoreRender2D.getTextInputValue(ax, (ay + 38), KEY_WIDTH, HEIGHT_SIZE) == "") 0 else (MoreRender2D.getTextInputValue(ax, (ay + 38), KEY_WIDTH, HEIGHT_SIZE)).toInt()
                 )
             )
         }

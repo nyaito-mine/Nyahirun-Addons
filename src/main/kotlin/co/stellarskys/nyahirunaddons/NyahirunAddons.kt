@@ -8,6 +8,7 @@ import net.fabricmc.api.ClientModInitializer
 
 object NyahirunAddons : ClientModInitializer {
     @JvmStatic val NAMESPACE: String = "nyahirun-addons"
+    @JvmStatic val TESTNAMESPACE: String = "nyaddons"
 
     @JvmStatic val partialTicks: Float get() = client.deltaTracker.getGameTimeDeltaPartialTick(true)
 

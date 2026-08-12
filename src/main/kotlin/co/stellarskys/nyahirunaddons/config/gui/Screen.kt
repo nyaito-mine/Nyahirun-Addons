@@ -1,11 +1,20 @@
-package co.stellarskys.nyahirunaddons.features.dungeon.notification
+package co.stellarskys.nyahirunaddons.config.gui
 
+import co.stellarskys.nyahirunaddons.config.gui.pages.CommandKeys
+import co.stellarskys.nyahirunaddons.config.gui.pages.Notification
 import co.stellarskys.stella.api.zenith.Aperture
 import co.stellarskys.stella.api.zenith.Zenith
 import net.minecraft.client.gui.GuiGraphicsExtractor
 
-class NotificationScreen : Aperture("Notification") {
-    private val page = Notification()
+class Screen(
+    title: String,
+) : Aperture("NyGUI") {
+
+    val page = when (title) {
+        "Notification" -> Notification()
+        "CommandKeys" -> CommandKeys()
+        else -> throw Exception("Invalid title")
+    }
 
     override fun onRender(context: GuiGraphicsExtractor, mouseX: Int, mouseY: Int, tickDelta: Float) {
         page.render(context, mouseX.toFloat(), mouseY.toFloat(), tickDelta)
@@ -28,10 +37,11 @@ class NotificationScreen : Aperture("Notification") {
     override fun onCharTyped(char: Char) =
         page.charTyped(char)
 
-    override fun onScreenClose() =
+    override fun onScreenClose() {
         page.screenClose()
+    }
 
     companion object {
-        fun open() = Zenith.client.setScreen(NotificationScreen())
+        fun open(title: String) = Zenith.client.setScreen(Screen(title))
     }
 }
