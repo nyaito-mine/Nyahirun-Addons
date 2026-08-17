@@ -14,6 +14,7 @@ import tech.thatgravyboat.skyblockapi.api.location.SkyBlockIsland
 @Module
 object Bat : Feature("RenderHighlight", island = SkyBlockIsland.THE_CATACOMBS) {
     private val TargetList = mutableSetOf<Bat>()
+    val depth = false
 
     override fun initialize() {
         on<TickEvent.Client> {
@@ -46,7 +47,7 @@ object Bat : Feature("RenderHighlight", island = SkyBlockIsland.THE_CATACOMBS) {
                     box,
                     RenderHighlight.BatLineColor,
                     RenderHighlight.BatFillColor,
-                    false
+                    depth
                 )
 
                 if (RenderHighlight.BatTracer) {
@@ -58,7 +59,7 @@ object Bat : Feature("RenderHighlight", island = SkyBlockIsland.THE_CATACOMBS) {
                         start,
                         end,
                         RenderHighlight.BatTracerColor,
-                        false
+                        depth
                     )
                 }
             }

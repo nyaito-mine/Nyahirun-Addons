@@ -23,7 +23,7 @@ object StarredMob : Feature("RenderHighlight", island = SkyBlockIsland.THE_CATAC
     private val PlayerDungeonMobSpawns = hashSetOf("Shadow Assassin", "King Midas")
     private val StarredRegex = Regex("^.*✯ .*\\d{1,3}(?:,\\d{3})*(?:\\.\\d+)?(?:[kM])?❤$")
     private val TargetList = mutableSetOf<Entity>()
-
+    val depth = false
 
     override fun initialize() {
         on<TickEvent.Client> {
@@ -45,7 +45,7 @@ object StarredMob : Feature("RenderHighlight", island = SkyBlockIsland.THE_CATAC
                     }
                 }
 
-                if (entity is Player && entity.isAlive && entity.uuid.version() == 2 && entity != player) {
+                if (entity is Player && entity.isAlive && entity != player) {
                     val entityName = entity.name.string
                     if (
                         PlayerDungeonMobSpawns.any { it in entityName }
@@ -72,7 +72,7 @@ object StarredMob : Feature("RenderHighlight", island = SkyBlockIsland.THE_CATAC
                     box,
                     RenderHighlight.StarredMobLineColor,
                     RenderHighlight.StarredMobFillColor.takeIf { RenderHighlight.StarredMobFill },
-                    false
+                    depth
                 )
             }
         }

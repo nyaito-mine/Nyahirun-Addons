@@ -14,3 +14,12 @@ data class Quintuple(
     val fourth: Any,
     val fifth: Any
 )
+
+data class Sextuple(
+    val first: Any,
+    val second: Any,
+    val third: Any,
+    val fourth: Any,
+    val fifth: Any,
+    val sixth: Any
+)

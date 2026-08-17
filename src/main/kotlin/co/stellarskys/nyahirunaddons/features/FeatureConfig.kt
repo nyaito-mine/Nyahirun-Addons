@@ -69,7 +69,12 @@ object FeatureConfig {
             )
         ),
         //Dungeon
-        SubcategoryDef(id = "PartyFinder", name = "Party Finder", category = "-NA Dungeon-"),
+        SubcategoryDef(id = "PartyFinder", name = "Party Finder", category = "-NA Dungeon-", features = listOf(
+            DropDownDef(name = "Info", options = listOf("-", "MoreInfo", "Highlight", "Both"), default = 0),
+            ColorPickerDef(id = "HighlightCanJoin", name = "Can Join", default = Color(0, 255, 0, 180), show = { settings -> settings["PartyFinder.Info"] as Int >= 2 }),
+            ColorPickerDef(id = "HighlightCantJoin", name = "Cant Join", default = Color(255, 0, 0, 180), show = { settings -> settings["PartyFinder.Info"] as Int >= 2 }),
+            )
+        ),
         SubcategoryDef(id = "AutoRefill", name = "Auto Refill", category = "-NA Dungeon-"),
         SubcategoryDef(id = "RenderHighlight", name = "Render Highlight", category = "-NA Dungeon-", features = listOf(
             ToggleDef(name = "Secret Item"),
@@ -371,6 +376,14 @@ object ChatHider {
     val LostAdventure get() = category.boolean("ChatHider.LostAdventure")
     val Essence get() = category.boolean("ChatHider.Essence")
     val Blessing get() = category.boolean("ChatHider.Blessing")
+}
+
+object PartyFinder {
+    private val category get() = FeatureConfig.sharedSections.partyFinder
+
+    val Info get() = category.int("PartyFinder.Info")
+    val HighlightCanJoin get() = category.color("PartyFinder.HighlightCanJoin")
+    val HighlightCantJoin get() = category.color("PartyFinder.HighlightCantJoin")
 }
 
 object RenderHighlight {

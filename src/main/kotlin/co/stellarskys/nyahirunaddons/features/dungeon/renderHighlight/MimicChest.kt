@@ -17,6 +17,7 @@ import tech.thatgravyboat.skyblockapi.api.location.SkyBlockIsland
 @Module
 object MimicChest : Feature("RenderHighlight", island = SkyBlockIsland.THE_CATACOMBS) {
     private val TargetList = mutableSetOf<BlockPos>()
+    val depth = false
 
     override fun initialize() {
         on<TickEvent.Client> {
@@ -53,7 +54,7 @@ object MimicChest : Feature("RenderHighlight", island = SkyBlockIsland.THE_CATAC
                     box,
                     RenderHighlight.MimicChestLineColor,
                     RenderHighlight.MimicChestFillColor,
-                    false,
+                    depth,
                 )
             }
         }

@@ -1,5 +1,6 @@
 package co.stellarskys.nyahirunaddons.config.gui.pages
 
+import co.stellarskys.nyahirunaddons.NyahirunAddons
 import co.stellarskys.nyahirunaddons.api.render.screen.GuiUtils
 import co.stellarskys.nyahirunaddons.api.render.screen.MoreRender2D
 import co.stellarskys.nyahirunaddons.config.gui.Page
@@ -242,7 +243,7 @@ class CommandKeys : Page("CommandKeys") {
                     lastSelectedCommandId = null
                     true
                 } else {
-                    fakeMessage("§b[Ny]§r No command selected to delete")
+                    fakeMessage("${NyahirunAddons.SHORTPREFIX} No command selected to delete")
                     false
                 }
             }

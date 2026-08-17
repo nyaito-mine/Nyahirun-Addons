@@ -16,6 +16,7 @@ import tech.thatgravyboat.skyblockapi.api.location.SkyBlockIsland
 object Wither : Feature("RenderHighlight", island = SkyBlockIsland.THE_CATACOMBS) {
     private val TargetList = mutableSetOf<WitherBoss>()
     private var isGoldor = false
+    val depth = false
 
     override fun initialize() {
         on<TickEvent.Client> {
@@ -61,7 +62,7 @@ object Wither : Feature("RenderHighlight", island = SkyBlockIsland.THE_CATACOMBS
                     box,
                     RenderHighlight.WitherLineColor,
                     RenderHighlight.WitherFillColor,
-                    false
+                    depth
                 )
 
                 if (isGoldor) {
@@ -73,7 +74,7 @@ object Wither : Feature("RenderHighlight", island = SkyBlockIsland.THE_CATACOMBS
                         start,
                         end,
                         RenderHighlight.WitherGoldorTracerColor,
-                        false
+                        depth
                     )
                 }
             }

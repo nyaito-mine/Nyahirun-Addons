@@ -3,13 +3,16 @@ package co.stellarskys.nyahirunaddons.events
 import co.stellarskys.nyahirunaddons.api.render.world.RenderContext
 import co.stellarskys.nyahirunaddons.events.core.BossEvent
 import co.stellarskys.nyahirunaddons.events.core.InteractionEvent
+import co.stellarskys.nyahirunaddons.events.core.ItemTooltipEvent
 import co.stellarskys.nyahirunaddons.events.core.RenderEvent
 import co.stellarskys.nyahirunaddons.utils.EventUtils.ReadOnly
 import co.stellarskys.stella.annotations.Module
 import co.stellarskys.stella.api.dungeons.Dungeon.floor
+import co.stellarskys.stella.api.zenith.client
 import co.stellarskys.stella.events.EventBus
 import co.stellarskys.stella.events.core.ChatEvent
 import co.stellarskys.stella.events.core.DungeonEvent
+import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents
 import net.fabricmc.fabric.api.event.client.player.ClientPreAttackCallback
 import net.fabricmc.fabric.api.event.player.AttackBlockCallback
@@ -19,6 +22,7 @@ import net.fabricmc.fabric.api.event.player.UseEntityCallback
 import net.fabricmc.fabric.api.event.player.UseItemCallback
 import net.minecraft.world.InteractionHand
 import net.minecraft.world.item.BlockItem
+import net.minecraft.world.item.Items
 import tech.thatgravyboat.skyblockapi.utils.text.TextProperties.stripped
 
 @Module
@@ -75,6 +79,18 @@ object EventBusAddons {
             EventBus.post(RenderEvent.Draw(RenderContext.fromContext(context)))
         }
 
+        ItemTooltipCallback.EVENT.register { stack, _, _, lines ->
+            val title = client.screen?.title?.stripped
+            val titleList = listOf(
+                Pair("Party Finder", Items.PLAYER_HEAD),
+                Pair("Catacombs Gate", Items.NETHER_STAR)
+            )
+            for (isTitle in titleList) {
+                if (title == isTitle.first && stack.item == isTitle.second) {
+                    EventBus.post(ItemTooltipEvent.Lines(lines))
+                }
+            }
+        }
 
         EventBus.on<ChatEvent.Receive> { event ->
             val msg = event.message.stripped

@@ -1,5 +1,6 @@
 package co.stellarskys.nyahirunaddons.config.gui.pages
 
+import co.stellarskys.nyahirunaddons.NyahirunAddons
 import co.stellarskys.nyahirunaddons.api.render.screen.GuiUtils
 import co.stellarskys.nyahirunaddons.api.render.screen.MoreRender2D
 import co.stellarskys.nyahirunaddons.config.gui.Page
@@ -254,7 +255,7 @@ class Notification : Page("Notification") {
                     lastSelectedNotificationId = null
                     true
                 } else {
-                    fakeMessage("§b[Ny]§r No notification selected to delete")
+                    fakeMessage("${NyahirunAddons.SHORTPREFIX} No notification selected to delete")
                     false
                 }
             }
