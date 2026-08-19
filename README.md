@@ -44,17 +44,16 @@ Require Version: Beta 1.0.5 Beta↑
 <details>
 <summary>NonCategory</summary>
 
-- Use Pet Highlight
-    - Pet Color
+- CommandKeys
+    - Enable Cooldown
+    - Cooldown Message
 - Efficient DB
-- Protect Item Mark
 
 </details>
 
 <details>
 <summary>Disable Use</summary>
 
-- Second Soul Sand
 - Place Tuba
 - Place Sceptre
 - Place BOL
@@ -91,17 +90,11 @@ Require Version: Beta 1.0.5 Beta↑
 - Party Finder(-, MoreInfo, Highlight, Both)
     - CanJoin(Highlight, Both)
     - CantJoin(Highlight, Both)
-- Auto Kick
-    - F7 Time
-    - M7 Time
-    - F1~F6 M1~M6 Time
-- Player Stats
-- List Stats
 
 </details>
 
 <details>
-<summary>AutoRefill</summary>
+<summary>AutoRefill [✘]</summary>
 
 - Ender Pearl
 - SuperboomTNT
@@ -123,6 +116,12 @@ Require Version: Beta 1.0.5 Beta↑
 - Secret Item
     - Secret Item Color
     - Secret Item Scale
+- Bat
+    - Bat Color Line
+    - Bat Color Face
+    - Bat Tracer
+    - Bat Tracer Color
+    - Bat Scale
 - Wither
     - Wither Color Line
     - Wither Color Face
@@ -143,6 +142,7 @@ Require Version: Beta 1.0.5 Beta↑
 <details>
 <summary>Notification</summary>
 
+- Custom Notifications
 - Enraged Wish
 - Gate Broke
 - Core Leap
@@ -153,57 +153,6 @@ Require Version: Beta 1.0.5 Beta↑
 - Key Pick
 
 </details>
-
-<details>
-<summary>Terminal Solver</summary>
-
-- Colors
-- Names
-- Panes
-- Numbers
-- Rubix
-- Melody
-- First Click Delay
-- GUI Scale
-- Slots Scale
-- GUI Roundness
-- GUI Hide Title
-- GUI Slots Fill
-- GUI Slots Roundness
-- Numbers Show Text
-- Terminal Sound
-    - Sound Name
-    - Sound Volume
-    - Sound Pitch
-
-</details>
-
-<details>
-<summary>Terminal Color</summary>
-
-- GUI Background
-- GUI Border Color
-- Header Color
-- Title Color
-- Colors Solution
-- Names Solution
-- Panes Solution
-- Numbers 1st
-- Numbers 2nd
-- Numbers 3rd
-- Rubix Positive
-- Rubix Negative
-- Melody Fill
-- Melody Correct
-- Melody Wrong
-- Melody Other
-
-</details>
-
-### Other
-- Protect Item
-- Command Keys
-
 ---
 
 <div align="center">
@@ -212,10 +161,10 @@ Require Version: Beta 1.0.5 Beta↑
 
 </div>
 
-1. Install Fabric 1.21.11
+1. Install Fabric 26.1
 2. Download this mod and Stella
 3. Place the mod jar files into your mods folder
-4. Use /stella to configure features
+4. Use /sa[/ny] to configure features
 5. Enjoy Dungeon!
 
 ***
@@ -229,8 +178,6 @@ Require Version: Beta 1.0.5 Beta↑
 - [Stella](https://github.com/Eclipse-5214/stella)
 - [StellaAddon](https://github.com/Eclipse-5214/StellaAddon)
 - [SBD](https://github.com/Evankhell0/sbd) inspired Party Finder
-- [Athen](https://github.com/skies-starred/Athen) Terminal Solver
-- [Skyblocker](https://modrinth.com/mod/skyblocker-liap) Protect Item
 
 
 - [HypixelAPI](https://developer.hypixel.net/) using Party Finder

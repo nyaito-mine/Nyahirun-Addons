@@ -18,8 +18,6 @@ object FeatureConfig {
         val autoRefill: ConfigSubcategory,
         val renderHighlight: ConfigSubcategory,
         val notification: ConfigSubcategory,
-        val terminalSolver: ConfigSubcategory,
-        val terminalColor: ConfigSubcategory
     )
 
     private val subcategories = listOf(
@@ -42,7 +40,7 @@ object FeatureConfig {
             )
         ),
         SubcategoryDef(id = "DisableUse", name = "Disable Use", category = "-NA General-", features = listOf(
-            ToggleDef(name = "Second SoulSand"),
+            //ToggleDef(name = "Second SoulSand"),
             ToggleDef(name = "Place Tuba"),
             ToggleDef(name = "Place BOL"),
             ToggleDef(name = "Place Sceptre"),
@@ -113,9 +111,7 @@ object FeatureConfig {
             ToggleDef(name = "Mask"),
             ToggleDef(name = "Key Pick")
             )
-        ),
-        SubcategoryDef(id = "TerminalSolver", name = "Terminal Solver", category = "-NA Dungeon-"),
-        SubcategoryDef(id = "TerminalColor", name = "Terminal Color", category = "-NA Dungeon-"),
+        )
     )
 
     fun register(target: Config): Sections {
@@ -140,8 +136,6 @@ object FeatureConfig {
             autoRefill = created.getValue("Auto Refill"),
             renderHighlight = created.getValue("Render Highlight"),
             notification = created.getValue("Notification"),
-            terminalSolver = created.getValue("Terminal Solver"),
-            terminalColor = created.getValue("Terminal Color")
         )
     }
 
@@ -308,8 +302,6 @@ object SubCategories {
     val autoRefill get() = FeatureConfig.sharedSections.autoRefill
     val renderHighlight get() = FeatureConfig.sharedSections.renderHighlight
     val notification get() = FeatureConfig.sharedSections.notification
-    val terminalSolver get() = FeatureConfig.sharedSections.terminalSolver
-    val terminalColor get() = FeatureConfig.sharedSections.terminalColor
 }
 
 private fun ConfigSubcategory.boolean(key: String): Boolean =
@@ -350,7 +342,7 @@ object NonCategory {
 object DisableUse {
     private val category get() = FeatureConfig.sharedSections.disableUse
 
-    val SecondSoulSand get() = category.boolean("DisableUse.SecondSoulSand")
+    //val SecondSoulSand get() = category.boolean("DisableUse.SecondSoulSand")
     val PlaceTuba get() = category.boolean("DisableUse.PlaceTuba")
     val PlaceBOL get() = category.boolean("DisableUse.PlaceBOL")
     val PlaceSceptre get() = category.boolean("DisableUse.PlaceSceptre")
